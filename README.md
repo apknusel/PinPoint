@@ -4,7 +4,7 @@ CSCI 5117, Fall 2024, [assignment description](https://canvas.umn.edu/courses/46
 
 ## App Info:
 
-* Team Name: TODO
+* Team Name: VeryTired
 * App Name: TODO
 * App Link: <https://TODO.com/>
 
