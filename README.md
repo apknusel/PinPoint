@@ -10,7 +10,7 @@ CSCI 5117, Fall 2024, [assignment description](https://canvas.umn.edu/courses/46
 
 ### Students
 
-* Alex Knuse, knuse001@umn.edu
+* Alex Knusel, knuse001@umn.edu
 * ...
 
 
