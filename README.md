@@ -7,7 +7,7 @@ CSCI 5117, Fall 2024, [assignment description](https://canvas.umn.edu/courses/46
 * Team Name: VeryTired
 * App Name: TODO
 * App Link: <https://TODO.com/>
-* LucidSpark: <https://lucid.app/lucidchart/06873868-6a7f-4d27-b612-e22b552b51cc/edit?invitationId=inv_28667ffb-4614-42d2-a00b-02df28c9d774&page=0_0>
+* LucidSpark: <https://lucid.app/lucidchart/06873868-6a7f-4d27-b612-e22b552b51cc/edit?invitationId=inv_28667ffb-4614-42d2-a00b-02df28c9d774>
 
 ### Students
 
