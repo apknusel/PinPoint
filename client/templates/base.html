@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Project 1{% endblock %}</title>
+    <!-- CSS links -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar block -->
+    <header>
+        {% block navbar %}
+        <!-- Default navbar content (can be overridden in child templates) -->
+        <nav>
+            <h1>Header</h1>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/map">Map</a></li>
+                <li><a href="/about">About</a></li>
+            </ul>
+        </nav>
+        {% endblock %}
+    </header>
+
+    <!-- Main content -->
+    <main>
+        <!-- Map block -->
+        <section id="map">
+            {% block map %}
+            <!-- Map will render here -->
+            {% endblock %}
+        </section>
+
+        <!-- Popups block -->
+        <section id="popups">
+            {% block popups %}
+            <!-- Popups will render here -->
+            {% endblock %}
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        {% block footer %}
+        <p>Footer</p>
+        {% endblock %}
+    </footer>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
