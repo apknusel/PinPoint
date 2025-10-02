@@ -1,0 +1,16 @@
+<div class="nav-wrapper">
+    <div class="pure-menu pure-menu-horizontal nav-inner">
+        <ul class="pure-menu-list nav-list">
+            <li class="pure-menu-item"><a href="/" class="pure-menu-link">Home</a></li>
+            <li class="pure-menu-item"><a href="/profile" class="pure-menu-link">Profile</a></li>
+            <li class="pure-menu-item"><a href="/create/post" class="pure-menu-link">Create Post</a></li>
+            <li class="pure-menu-item login-item">
+                {% if session.get('user') %}
+                    <a href="/logout" class="pure-menu-link">Logout</a>
+                {% else %}
+                    <a href="/login" class="pure-menu-link">Login</a>
+                {% endif %}
+            </li>
+        </ul>
+    </div>
+</div>
