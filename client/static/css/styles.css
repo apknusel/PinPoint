@@ -1,0 +1,63 @@
+/* Make map fill entire viewport */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+#map {
+  height: 100%;
+  width: 100%;
+}
+
+/* Search bar styling */
+.search-container {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  width: 400px;
+  z-index: 9999;
+}
+
+.search-form {
+  width: 100%;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  font-size: 16px;
+  outline: none;
+}
+
+.search-input:focus {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Login button styling */
+.login-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+}
+
+.login-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  font-size: 16px;
+  cursor: pointer;
+  outline: none;
+}
+
+.login-button:hover {
+  background: #f5f5f5;
+}

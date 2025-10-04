@@ -5,6 +5,10 @@ from flask import Flask, render_template, redirect, url_for, current_app, sessio
 from contextlib import contextmanager
 from authlib.integrations.flask_client import OAuth
 from urllib.parse import quote_plus, urlencode
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 pool = None
 oauth = None

@@ -1,7 +1,31 @@
-{% extends '3-5.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>/home — Full Map Layout</title>
 
-{% block title %}Home{% endblock %}
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+  <!-- Fullscreen map container -->
+  <div id="map"></div>
 
-{% block center %}
-	<h1>Home</h1>
-{% endblock %}
+  <!-- Overlay search bar -->
+  <div class="search-container">
+    <form class="search-form">
+      <input id="autocomplete" type="search" class="search-input" placeholder="Search for a location...">
+    </form>
+  </div>
+
+  <!-- Login button -->
+  <div class="login-container">
+    <a href="/login" class="login-button">Login</a>
+  </div>
+
+
+  <!-- Google Maps API -->
+  <script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places&callback=initMap" async defer></script>
+  <script src="/static/js/main.js"></script>
+</body>
+</html>
