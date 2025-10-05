@@ -1,7 +1,8 @@
-{% extends 'full_page.html' %}
+<!-- Fullscreen map container -->
+<div class="map-container">
+  <div id="map"></div>
+</div>
 
-{% block title %}Map{% endblock %}
-
-{% block content %}
-	<h1>Full page map</h1>
-{% endblock %}
+<!-- Google Maps API -->
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places"></script>
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
