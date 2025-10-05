@@ -1,7 +1,43 @@
-{% extends '3-5.html' %}
+{% extends '3-2.html' %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Create Post{% endblock %}
 
-{% block center %}
-	<h1>Create post</h1>
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/create_post.css') }}">
+{% endblock %}
+
+{% block scripts %}
+<script
+	src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initCreatePostMap&loading=async&v=weekly"
+	async defer></script>
+<script src="{{ url_for('static', filename='js/create_post.js') }}"></script>
+{% endblock %}
+
+{% block left %}
+<div class="container">
+	<h2>Select Location</h2>
+	<div id="map" class="create-post-map"></div>
+	<p class="map-note">Click on the map to place or move the marker.</p>
+</div>
+{% endblock %}
+
+{% block right %}
+<div class="container">
+	<h2>Post Details</h2>
+	<form class="pure-form pure-form-stacked" action="/create/post" method="post" enctype="multipart/form-data">
+		<label for="image">Image
+			<input type="file" id="image" name="image" accept="image/*" required>
+		</label>
+		<div class="image-preview-wrapper">
+			<img id="imagePreview" class="image-preview" alt="Selected image preview" />
+		</div>
+		<label for="caption">Caption
+			<textarea id="caption" name="caption" rows="6" required></textarea>
+		</label>
+		<input type="hidden" name="latitude" id="latitude">
+		<input type="hidden" name="longitude" id="longitude">
+		<button type="submit" class="pure-button pure-button-primary" disabled id="submitBtn">Create Post</button>
+	</form>
+</div>
 {% endblock %}
