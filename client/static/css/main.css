@@ -2,15 +2,8 @@
   margin-left: auto;
 }
 
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100vh;
-  width: 100vw;
-  font-family: Arial, sans-serif;
-}
-
+/** there is probably a better way to do this **/
 #map {
-  height: 100dvh;    /* or 100svh; better on mobile */
-  width: 100dvh;       /* avoids scrollbar-width issue of 100vw */
+  width: 100vw;
+  height: calc(100vh - 34.4px);
 }

@@ -1,6 +1,8 @@
-  <!-- Fullscreen map container -->
+<!-- Fullscreen map container -->
+<div class="map-container">
   <div id="map"></div>
+</div>
 
-  <!-- Google Maps API -->
-  <script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places"></script>
-  <script src="/static/js/main.js"></script>
+<!-- Google Maps API -->
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places"></script>
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
