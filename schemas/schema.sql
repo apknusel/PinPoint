@@ -10,8 +10,7 @@ CREATE TABLE Users (
 CREATE TABLE Posts (
   post_id TEXT PRIMARY KEY,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  title TEXT NOT NULL,
-  content TEXT NOT NULL,
+  caption TEXT NOT NULL,
   user_id TEXT NOT NULL,
   location GEOMETRY(Point, 4326),
   FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
