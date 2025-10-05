@@ -14,6 +14,7 @@ CSCI 5117, Fall 2024, [assignment description](https://canvas.umn.edu/courses/46
 * Alex Knusel, knuse001@umn.edu
 * Sam Bassan, bassa050@umn.edu
 * Shuo Jiang, Jian1105@umn.edu
+* David Tomlinson, tomli104@d.umn.edu
 
 
 ## Key Features

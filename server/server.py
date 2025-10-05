@@ -5,10 +5,6 @@ from flask import Flask, render_template, redirect, url_for, current_app, sessio
 from contextlib import contextmanager
 from authlib.integrations.flask_client import OAuth
 from urllib.parse import quote_plus, urlencode
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
 
 pool = None
 oauth = None
@@ -17,6 +13,8 @@ def setup():
     global pool, oauth
     app.secret_key = os.environ.get("APP_SECRET_KEY")
     DATABASE_URL = os.environ.get("DATABASE_URL")
+    GOOGLE_MAPS_API_KEY = os.environ.get("GOOGLE_MAPS_API_KEY")
+    current_app.config["GOOGLE_MAPS_API_KEY"] = GOOGLE_MAPS_API_KEY
     current_app.logger.info(f"creating db connection pool")
     pool = ThreadedConnectionPool(1, 100, dsn=DATABASE_URL, sslmode='require')
     oauth = OAuth(app)
@@ -29,7 +27,6 @@ def setup():
         },
         server_metadata_url=f'https://{os.environ.get("AUTH0_DOMAIN")}/.well-known/openid-configuration'
     )
-
 
 @contextmanager
 def get_db_connection():
@@ -65,6 +62,10 @@ app = Flask(
 
 with app.app_context():
     setup()
+
+@app.context_processor
+def inject_google_maps_key():
+    return {"google_maps_api_key": current_app.config.get("GOOGLE_MAPS_API_KEY")}
 
 # Auth0 routes
 
