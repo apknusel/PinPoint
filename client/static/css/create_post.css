@@ -25,3 +25,20 @@
     border: 1px solid #ccc;
     border-radius: 4px;
 }
+
+.tag-wrapper{
+    list-style-type: none;
+    padding-left: 0%;
+}
+
+.tag-content{
+    display: inline-flex;
+    border-radius: 25px;
+    padding: 0.2rem 0.5rem;
+    background-color: #59D5D9;
+    transition: background-color 0.3s ease;
+}
+
+.tag-content:hover{
+    background-color: #E80C3A;
+}

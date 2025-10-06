@@ -40,6 +40,17 @@ window.initCreatePostMap = initCreatePostMap;
 document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('image');
     const preview = document.getElementById('imagePreview');
+
+    const tagBtn = document.getElementById('tagBtn');
+    const tagWrapper = document.getElementById('tagWrapper');
+    const tagValues = document.getElementById('hiddenTags');
+
+    let tagHolder = [];
+
+    function updateTagValues() {
+        tagValues.value = tagHolder.join(',');
+    }
+
     if (!fileInput || !preview) return;
 
     fileInput.addEventListener('change', () => {
@@ -56,4 +67,28 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         reader.readAsDataURL(file);
     });
+    //Event listers for tag handling
+    tagBtn.addEventListener('click', () => {
+        const tagInput = document.getElementById('tagInput');
+        tagContent = tagInput.value;
+
+        if (!tagContent || tagHolder.includes(tagContent)) return;
+        tagHolder.push(tagContent);
+        const newTag = document.createElement("li");
+        newTag.className = "tag-content";
+        newTag.innerHTML = `#${tagContent}`;
+        newTag.addEventListener('click', (e) => {
+            const clikTag = e.target;
+            const clikValues = String(clikTag.innerHTML).replace('#',"");
+            tagHolder = tagHolder.filter(tag => tag !== clikValues);
+            updateTagValues();
+            clikTag.remove();
+        });
+
+        tagWrapper.append(newTag);
+        tagInput.value = "";
+        updateTagValues();
+    });
 });
+
+

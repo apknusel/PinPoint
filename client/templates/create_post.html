@@ -29,6 +29,12 @@
 		<label for="image">Image
 			<input type="file" id="image" name="image" accept="image/*" required>
 		</label>
+
+		<ul class="tag-wrapper" id="tagWrapper"></ul>
+		<input type="text" id="tagInput" placeholder="Enter tag"/>
+		<button type="button" id="tagBtn" >Add tag</button>
+		<input type="hidden" id="hiddenTags" name="tags" />
+
 		<div class="image-preview-wrapper">
 			<img id="imagePreview" class="image-preview" alt="Selected image preview" />
 		</div>
