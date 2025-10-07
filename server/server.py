@@ -1,26 +1,20 @@
 import os
-from psycopg2.pool import ThreadedConnectionPool
-from psycopg2.extras import DictCursor
 from flask import Flask, render_template, redirect, url_for, current_app, session, request, jsonify
-from contextlib import contextmanager
 from authlib.integrations.flask_client import OAuth
 from urllib.parse import quote_plus, urlencode
 from dotenv import load_dotenv
 import uuid
+import db
 
 load_dotenv()
 
-pool = None
 oauth = None
 
 def setup():
-    global pool, oauth
+    global oauth
     app.secret_key = os.environ.get("APP_SECRET_KEY")
-    DATABASE_URL = os.environ.get("DATABASE_URL")
-    GOOGLE_MAPS_API_KEY = os.environ.get("GOOGLE_MAPS_API_KEY")
-    current_app.config["GOOGLE_MAPS_API_KEY"] = GOOGLE_MAPS_API_KEY
-    current_app.logger.info(f"creating db connection pool")
-    pool = ThreadedConnectionPool(1, 100, dsn=DATABASE_URL, sslmode='require')
+    current_app.config["GOOGLE_MAPS_API_KEY"] = os.environ.get("GOOGLE_MAPS_API_KEY")
+    current_app.config["DB_POOL"] = db.init_pool(os.environ.get("DATABASE_URL"))
     oauth = OAuth(app)
     oauth.register(
         "auth0",
@@ -31,29 +25,6 @@ def setup():
         },
         server_metadata_url=f'https://{os.environ.get("AUTH0_DOMAIN")}/.well-known/openid-configuration'
     )
-
-@contextmanager
-def get_db_connection():
-    connection = None
-    try:
-        connection = pool.getconn()
-        yield connection
-    finally:
-        pool.putconn(connection)
-
-
-@contextmanager
-def get_db_cursor(commit=False):
-    with get_db_connection() as connection:
-        cursor = connection.cursor(cursor_factory=DictCursor)
-        try:
-            yield cursor
-            if commit:
-                connection.commit()
-        finally:
-            cursor.close()
-            
-# App creation
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 CLIENT_DIR = os.path.join(BASE_DIR, "..", "client")
@@ -71,8 +42,6 @@ with app.app_context():
 def inject_google_maps_key():
     return {"google_maps_api_key": current_app.config.get("GOOGLE_MAPS_API_KEY")}
 
-# Auth0 routes
-
 @app.route("/login")
 def login():
     return oauth.auth0.authorize_redirect(
@@ -84,7 +53,6 @@ def logout():
     if not session:
         return redirect("/")
     session.clear()
-
     domain = os.environ.get("AUTH0_DOMAIN")
     client_id = os.environ.get("AUTH0_CLIENT_ID")
     return_to = url_for("index", _external=True)
@@ -95,10 +63,10 @@ def logout():
         },
         quote_via=quote_plus,
     )
-
+    
     logout_url = f"https://{domain}/v2/logout?{params}"
     return redirect(logout_url)
-    
+
 @app.route("/callback", methods=["GET", "POST"])
 def callback():
     token = oauth.auth0.authorize_access_token()
@@ -108,74 +76,25 @@ def callback():
     except Exception:
         session["userinfo"] = None
     session["user"] = token
-    print(session)
-    print(session["userinfo"])
-    # Upsert user record
     ensure_logged_in_user()
     return redirect(url_for("index"))
 
 def ensure_logged_in_user():
-    """
-    Ensure the current Auth0 user exists (upsert) in Users table.
-    Returns the user_id or None.
-    """
     userinfo = session.get("userinfo")
     if not userinfo:
         return None
+    pool = current_app.config["DB_POOL"]
     user_id = userinfo.get("sub")
     nickname = userinfo.get("nickname") or None
     email = userinfo.get("email") or None
-    with get_db_cursor(commit=True) as cur:
-        cur.execute(
-            """
-            INSERT INTO Users (user_id, nickname, email)
-            VALUES (%s, %s, %s)
-            ON CONFLICT (user_id) DO UPDATE
-              SET nickname = EXCLUDED.nickname,
-                  email = EXCLUDED.email
-            """,
-            (user_id, nickname, email),
-        )
+    db.upsert_user(pool, user_id, nickname, email)
     return user_id
 
-# API routes
 @app.route("/api/posts")
 def get_posts():
-    """API endpoint to get all posts with their locations"""
-    with get_db_cursor() as cur:
-        cur.execute(
-            """
-            SELECT 
-                p.post_id, 
-                p.caption, 
-                p.user_id,
-                u.nickname,
-                ST_X(p.location) as longitude, 
-                ST_Y(p.location) as latitude
-            FROM Posts p
-            JOIN Users u ON p.user_id = u.user_id
-            WHERE p.location IS NOT NULL
-            """
-        )
-        posts = cur.fetchall()
-        
-        # Convert to list of dicts
-        posts_list = [
-            {
-                "post_id": post["post_id"],
-                "caption": post["caption"],
-                "user_id": post["user_id"],
-                "nickname": post["nickname"],
-                "latitude": post["latitude"],
-                "longitude": post["longitude"]
-            }
-            for post in posts
-        ]
-        
-    return jsonify(posts_list)
+    pool = current_app.config["DB_POOL"]
+    return jsonify(db.fetch_posts(pool))
 
-# General routes
-    
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -190,7 +109,6 @@ def create_post():
         return redirect(url_for("login"))
     if request.method == "GET":
         return render_template("create_post.html", google_maps_api_key=os.environ.get("GOOGLE_MAPS_API_KEY"))
-
     user_id = ensure_logged_in_user()
     if not user_id:
         return redirect(url_for("login"))
@@ -198,7 +116,6 @@ def create_post():
     caption = request.form.get("caption", "").strip()
     lat = request.form.get("latitude")
     lng = request.form.get("longitude")
-    print(file, caption, lat, lng, user_id)
     if not file or not caption or not lat or not lng:
         return "Missing required fields", 400
     try:
@@ -206,27 +123,12 @@ def create_post():
         lng_f = float(lng)
     except ValueError:
         return "Invalid coordinates", 400
-
     post_id = str(uuid.uuid4())
     media_id = str(uuid.uuid4())
     file_bytes = file.read()
     file_name = file.filename
-
-    with get_db_cursor(commit=True) as cur:
-        cur.execute(
-            """
-            INSERT INTO Posts (post_id, caption, user_id, location)
-            VALUES (%s, %s, %s, ST_SetSRID(ST_MakePoint(%s,%s),4326))
-            """,
-            (post_id, caption, user_id, lng_f, lat_f),
-        )
-        cur.execute(
-            """
-            INSERT INTO Media (media_id, file_name, file_data, post_id)
-            VALUES (%s, %s, %s, %s)
-            """,
-            (media_id, file_name, file_bytes, post_id),
-        )
+    pool = current_app.config["DB_POOL"]
+    db.insert_post_with_media(pool, post_id, caption, user_id, lng_f, lat_f, media_id, file_name, file_bytes)
     return redirect(url_for("post", post_id=post_id))
 
 @app.route("/profile")
@@ -235,7 +137,6 @@ def profile_root():
         return redirect(url_for("login"))
     userinfo = session["userinfo"]
     return redirect(url_for("profile", username=userinfo.get("nickname")))
-        
 
 @app.route("/profile/<username>")
 def profile(username):

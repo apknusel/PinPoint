@@ -48,6 +48,7 @@ CREATE TABLE Followers (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   follower_id TEXT NOT NULL,
   followee_id TEXT NOT NULL,
+  is_accepted BOOLEAN,
   CHECK (follower_id != followee_id),
   FOREIGN KEY (follower_id) REFERENCES Users(user_id) ON DELETE CASCADE,
   FOREIGN KEY (followee_id) REFERENCES Users(user_id) ON DELETE CASCADE,
