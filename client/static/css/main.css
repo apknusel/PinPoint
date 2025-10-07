@@ -1,8 +1,17 @@
+/* these are placeholders for colors */
+:root {
+  --color-primary: #547C8C;
+  --color-secondary: #D9A87E;
+  --color-accent: #57591D;
+  --color-neutral: #22261B;
+  --color-success: #2E4022;
+}
+
 .nav-list .login-item {
   margin-left: auto;
 }
 
-/** there is probably a better way to do this **/
+/* there is probably a better way to do this */
 #map {
   width: 100vw;
   height: calc(100vh - 34.4px);

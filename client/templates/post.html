@@ -1,7 +1,45 @@
 {% extends '3-5.html' %}
 
-{% block title %}Post {{ post_id }}{% endblock %}
+{% block title %}Post{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/post.css') }}">
+{% endblock %}
 
 {% block center %}
-  <h1>Post {{ post_id }}</h1>
+<div class="post-div">
+  <div class="post-header">
+    <img class="post-avatar" src="{{ post.picture}}" alt="{{ post.nickname }} profile">
+    <span class="post-username">{{ post.nickname }}</span>
+  </div>
+  <div class="post-picture">
+    <img src="data:image/jpeg;base64,{{ post.image_data }}" alt="Post image">
+  </div>
+  <div class="post-caption">
+    <p><strong>Caption:</strong> {{ post.caption }}</p>
+  </div>
+  <div class="post-comments">
+    {% if comments %}
+    {% for c in comments %}
+    <div class="comment">
+      <img class="comment-avatar" src="{{ c.picture or '' }}" alt="{{ c.nickname }}">
+      <div class="comment-body">
+        <strong>{{ c.nickname }}</strong>: {{ c.comment }}
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="no-comments">No comments</div>
+    {% endif %}
+
+    <!-- Add comments -->
+    {% if session.get('userinfo') %}
+    <form class="comment-form" method="post" action="/api/{{ post.post_id }}/comment">
+      <input type="text" name="comment" id="comment" required placeholder="Add a comment..."></input>
+      <button type="submit" class="pure-button pure-button-primary">Comment</button>
+    </form>
+    {% else %}
+    <p><a href="/login">Log in</a> to comment.</p>
+    {% endif %}
+  </div>
+</div>
 {% endblock %}
