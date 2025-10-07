@@ -1,11 +1,14 @@
 import os
 from psycopg2.pool import ThreadedConnectionPool
 from psycopg2.extras import DictCursor
-from flask import Flask, render_template, redirect, url_for, current_app, session, request
+from flask import Flask, render_template, redirect, url_for, current_app, session, request, jsonify
 from contextlib import contextmanager
 from authlib.integrations.flask_client import OAuth
 from urllib.parse import quote_plus, urlencode
+from dotenv import load_dotenv
 import uuid
+
+load_dotenv()
 
 pool = None
 oauth = None
@@ -134,6 +137,42 @@ def ensure_logged_in_user():
             (user_id, nickname, email),
         )
     return user_id
+
+# API routes
+@app.route("/api/posts")
+def get_posts():
+    """API endpoint to get all posts with their locations"""
+    with get_db_cursor() as cur:
+        cur.execute(
+            """
+            SELECT 
+                p.post_id, 
+                p.caption, 
+                p.user_id,
+                u.nickname,
+                ST_X(p.location) as longitude, 
+                ST_Y(p.location) as latitude
+            FROM Posts p
+            JOIN Users u ON p.user_id = u.user_id
+            WHERE p.location IS NOT NULL
+            """
+        )
+        posts = cur.fetchall()
+        
+        # Convert to list of dicts
+        posts_list = [
+            {
+                "post_id": post["post_id"],
+                "caption": post["caption"],
+                "user_id": post["user_id"],
+                "nickname": post["nickname"],
+                "latitude": post["latitude"],
+                "longitude": post["longitude"]
+            }
+            for post in posts
+        ]
+        
+    return jsonify(posts_list)
 
 # General routes
     

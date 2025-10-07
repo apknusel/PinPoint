@@ -57,3 +57,5 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.readAsDataURL(file);
     });
 });
+
+window.onload = initCreatePostMap;
