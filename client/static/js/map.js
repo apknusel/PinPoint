@@ -1,23 +1,17 @@
 let map;
 
 async function initMap() {
-    const randomLocation = generateRandomLatLng();
+    const center = { lat: 44.9778, lng: -93.2650 };
 
     map = new google.maps.Map(document.getElementById('map'), {
-        center: randomLocation,
-        zoom: 8,
+        center: center,
+        zoom: 11,
         streetViewControl: false,
         mapTypeControl: false
     });
 
     // Fetch and display posts
     await loadPosts();
-}
-
-function generateRandomLatLng() {
-    const randomLat = (Math.random() * 180) - 90; // -90 to 90
-    const randomLng = (Math.random() * 360) - 180; // -180 to 180
-    return { lat: randomLat, lng: randomLng };
 }
 
 async function loadPosts() {
