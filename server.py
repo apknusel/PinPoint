@@ -27,13 +27,26 @@ def setup():
     )
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-CLIENT_DIR = os.path.join(BASE_DIR, "..", "client")
+CLIENT_DIR = os.path.join(BASE_DIR, "client")
 
 app = Flask(
     __name__,
     template_folder=os.path.join(CLIENT_DIR, "templates"),
     static_folder=os.path.join(CLIENT_DIR, "static"),
 )
+
+def ensure_logged_in_user():
+    userinfo = session.get("userinfo")
+    if not userinfo:
+        return None
+    pool = current_app.config["DB_POOL"]
+    print(userinfo)
+    user_id = userinfo.get("sub")
+    nickname = userinfo.get("nickname") or None
+    email = userinfo.get("email") or None
+    picture = userinfo.get("picture") or None
+    db.upsert_user(pool, user_id, nickname, email, picture)
+    return user_id
 
 with app.app_context():
     setup()
@@ -79,21 +92,24 @@ def callback():
     ensure_logged_in_user()
     return redirect(url_for("index"))
 
-def ensure_logged_in_user():
-    userinfo = session.get("userinfo")
-    if not userinfo:
-        return None
-    pool = current_app.config["DB_POOL"]
-    user_id = userinfo.get("sub")
-    nickname = userinfo.get("nickname") or None
-    email = userinfo.get("email") or None
-    db.upsert_user(pool, user_id, nickname, email)
-    return user_id
-
 @app.route("/api/posts")
 def get_posts():
     pool = current_app.config["DB_POOL"]
     return jsonify(db.fetch_posts(pool))
+
+@app.route("/api/<post_id>/comment", methods=["POST"])
+def add_comment(post_id):
+    if not session.get("userinfo"):
+        return redirect(url_for("login"))
+    user_id = ensure_logged_in_user()
+    comment = request.form.get("comment", "").strip()
+    # comment is empty
+    if not comment:
+        return redirect(url_for("post", post_id=post_id))
+    pool = current_app.config["DB_POOL"]
+    comment_id = str(uuid.uuid4())
+    db.insert_comment(pool, comment_id, comment, post_id, user_id)
+    return redirect(url_for("post", post_id=post_id))
 
 @app.route("/")
 def index():
@@ -101,7 +117,10 @@ def index():
 
 @app.route("/post/<post_id>")
 def post(post_id):
-    return render_template("post.html", post_id=post_id)
+    pool = current_app.config["DB_POOL"]
+    post = db.fetch_single_post(pool, post_id)
+    comments = db.fetch_comments(pool, post_id)
+    return render_template("post.html", post=post, comments=comments)
 
 @app.route("/create/post", methods=["GET", "POST"])
 def create_post():
