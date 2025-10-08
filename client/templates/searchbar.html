@@ -91,12 +91,10 @@
     }
 
     for (const { user_id, nickname } of user_data) {
-      console.log(nickname);
-      if (nickname.toUpperCase().indexOf(filter.toUpperCase()) > -1) {
-        user = createElement(nickname);
-        search_results.append(user);
-        found_user = true;
-      }
+      user = createElement(nickname);
+      search_results.append(user);
+      found_user = true;
+
     }
   }
 
