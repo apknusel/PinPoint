@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style>
+    .search-input {
+      box-sizing: border-box;
+      font-size: 16px;
+      padding: 10px 15px 10px 20px;
+      border-color: rgb(97, 95, 95);
+      border-radius: 2.1rem;
+      width: 100%;
+    }
+
+    .search-input:focus {
+      outline: 3px solid #5080e1;
+    }
+
+    .dropdown a:hover {
+      background-color: #ddd;
+    }
+
+    .user {
+      color: black;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+    }
+
+    .user:hover {
+      color: black;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+      background-color: #F4F1F0;
+    }
+
+    .searchbar-wrapper {
+      width: 35vw;
+    }
+
+    .search-results {
+      background: #f6f6f6;
+      margin: 0px 20px 0px 20px;
+    }
+  </style>
+</head>
+<div id="searchbarWrapper" class="searchbar-wrapper">
+  <input type="text" placeholder="Search.." class="search-input" id="searchInput">
+  <div class="search-results" id="searchResults">
+
+  </div>
+</div>
+
+
+<script>
+
+  // TODO: replace 'profile' with the profile/posts route name
+  const url = "{{ url_for('profile', username='__name__') }}";
+  const search_input = document.getElementById('searchInput');
+  const search_results = document.getElementById('searchResults');
+  const searchbar_wrapper = document.getElementById('searchbarWrapper');
+  search_input.addEventListener('input', filterFunction);
+
+  async function filterFunction() {
+    console.log('runs');
+    let user_data = [];
+    const filter = search_input.value;
+
+    if (!filter) {
+      search_results.innerHTML = "";
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/search_users?name=${encodeURIComponent(filter)}`);
+      if (!response.ok) throw new Error("Fetch error");
+      user_data = await response.json();
+    } catch (err) {
+      console.log(err);
+      return;
+    }
+
+    console.log(user_data.length);
+
+    let found_user = false;
+    search_results.innerHTML = "";
+    if (!user_data.length) {
+      searchbar_wrapper.className = "searchbar-wrapper";
+      return;
+    }
+
+    for (const { user_id, nickname } of user_data) {
+      console.log(nickname);
+      if (nickname.toUpperCase().indexOf(filter.toUpperCase()) > -1) {
+        user = createElement(nickname);
+        search_results.append(user);
+        found_user = true;
+      }
+    }
+  }
+
+  function createElement(name) {
+    const element = document.createElement('a');
+    element.className = "user";
+    element.innerText = name;
+    element.href = url.replace('__name__', encodeURIComponent(name));
+    console.log(element);
+    return element;
+  }
+</script>
+
+</html>

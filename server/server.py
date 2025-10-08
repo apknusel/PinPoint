@@ -1,7 +1,7 @@
 import os
 from psycopg2.pool import ThreadedConnectionPool
 from psycopg2.extras import DictCursor
-from flask import Flask, render_template, redirect, url_for, current_app, session, request
+from flask import Flask, render_template, redirect, url_for, current_app, session, request, jsonify
 from contextlib import contextmanager
 from authlib.integrations.flask_client import OAuth
 from urllib.parse import quote_plus, urlencode
@@ -210,3 +210,22 @@ def profile_map(username):
 @app.route("/profile/<username>/settings")
 def profile_settings(username):
     return render_template("profile_settings.html", username=username)
+
+@app.route('/searchbar')
+def search_bar():
+    return render_template('searchbar.html')
+
+@app.route("/api/search_users")
+def search_users():
+    name = request.args.get("name")
+    print(name)
+    with get_db_cursor() as cur:
+        cur.execute(
+            "SELECT user_id, nickname FROM users WHERE nickname ILIKE %s",
+            (f"%{name}%",)
+        )
+        entries = cur.fetchall()
+        matching_users = [dict(entry) for entry in entries]
+        print(matching_users)
+    return matching_users
+
