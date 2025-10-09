@@ -170,10 +170,6 @@ def profile_map(username):
 def profile_settings(username):
     return render_template("profile_settings.html", username=username)
 
-@app.route('/searchbar')
-def search_bar():
-    return render_template('searchbar.html')
-
 @app.route("/api/search_users")
 def search():
     name = request.args.get('name')
