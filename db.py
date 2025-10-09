@@ -163,3 +163,19 @@ def fetch_comments(pool, post_id):
             ]
     finally:
         pool.putconn(conn)
+
+def fetch_users(pool, name):
+    conn = pool.getconn()
+    try:
+        with conn.cursor(cursor_factory=DictCursor) as cur:
+            cur.execute(
+            """
+            SELECT user_id, nickname 
+            FROM users WHERE nickname ILIKE %s
+            """,
+            (f"%{name}%",)
+        )
+            rows = cur.fetchall()
+            return [dict(row) for row in rows]
+    finally:
+        pool.putconn(conn)

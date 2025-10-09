@@ -175,16 +175,9 @@ def search_bar():
     return render_template('searchbar.html')
 
 @app.route("/api/search_users")
-def search_users():
-    name = request.args.get("name")
-    print(name)
-    with get_db_cursor() as cur:
-        cur.execute(
-            "SELECT user_id, nickname FROM users WHERE nickname ILIKE %s",
-            (f"%{name}%",)
-        )
-        entries = cur.fetchall()
-        matching_users = [dict(entry) for entry in entries]
-        print(matching_users)
-    return matching_users
+def search():
+    name = request.args.get('name')
+    pool = current_app.config["DB_POOL"]
+    matching_users = db.fetch_users(pool, name)
+    return jsonify(matching_users)
 
