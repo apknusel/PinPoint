@@ -170,7 +170,7 @@ def fetch_users(pool, name):
         with conn.cursor(cursor_factory=DictCursor) as cur:
             cur.execute(
             """
-            SELECT user_id, nickname 
+            SELECT user_id, nickname, picture
             FROM users WHERE nickname ILIKE %s
             """,
             (f"%{name}%",)

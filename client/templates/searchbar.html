@@ -5,8 +5,8 @@
     .searchbar-wrapper {
       width: 35vw;
       position: fixed;
-      top: 40px;          
-      left: 2px; 
+      top: 40px;
+      left: 2px;
     }
 
     .searchbar-dropdown {
@@ -27,29 +27,34 @@
       outline: 3px solid #5080e1;
     }
 
+    .dropdown-entries {
+      display: flex;
+      align-items: center;
+      color: black;
+      padding: 5px 16px;
+      text-decoration: none;
+      background-color: #F4F1F0;
+      transition: background-color 0.15s ease;
+    }
+
     .dropdown-entries:hover {
       background-color: #ddd;
     }
 
-    .dropdown-entries {
-      color: black;
-      padding: 8px 16px;
-      text-decoration: none;
-      display: block;
-      background-color: #F4F1F0;
+    .user-avatar {
+      width: 30px;
+      height: 30px;
+      margin: 8px;
     }
   </style>
 </head>
 <div id="searchbarWrapper" class="searchbar-wrapper">
   <input type="text" placeholder="Search.." class="search-input" id="searchInput">
   <div class="searchbar-dropdown" id="searchbarDropdown">
-
   </div>
 </div>
 
-
 <script>
-
   // TODO: replace 'profile' with the profile/posts route name
   const url = "{{ url_for('profile', username='__name__') }}";
   const search_input = document.getElementById('searchInput');
@@ -78,28 +83,35 @@
 
     console.log(user_data.length);
 
-    let found_user = false;
     search_results.innerHTML = "";
     if (!user_data.length) {
       searchbar_wrapper.className = "searchbar-wrapper";
       return;
     }
 
-    for (const { user_id, nickname } of user_data) {
-      user = createElement(nickname);
+    for (const { user_id, nickname, picture } of user_data) {
+      user = createElement(nickname, picture);
       search_results.append(user);
-      found_user = true;
-
     }
   }
 
-  function createElement(name) {
-    const element = document.createElement('a');
-    element.className = "dropdown-entries";
-    element.innerText = name;
-    element.href = url.replace('__name__', encodeURIComponent(name));
-    console.log(element);
-    return element;
+  function createElement(name, picture) {
+    const link = document.createElement('a');
+    link.href = url.replace('__name__', encodeURIComponent(name));
+    link.className = "dropdown-entries";
+
+    const img = document.createElement('img');
+    img.src = String(picture);
+    img.className = "user-avatar";
+    console.log(link);
+
+    const text = document.createElement('span');
+    text.innerText = name;
+
+    link.appendChild(img);
+    link.appendChild(text);
+
+    return link;
   }
 </script>
 
