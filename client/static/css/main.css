@@ -5,6 +5,11 @@
   --color-accent: #57591D;
   --color-neutral: #22261B;
   --color-success: #2E4022;
+
+  --searchbar-color: #615F5F;
+  --searchbar-color-selected: #5080e1;
+  --dropdown-color: #F4F1F0;
+  --dropdown-color-selected: #ddd;
 }
 
 .nav-list .login-item {
