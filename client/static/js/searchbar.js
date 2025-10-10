@@ -8,9 +8,9 @@ search_input.addEventListener('input', filterFunction);
 async function filterFunction() {
   let user_data = [];
   const filter = search_input.value;
-  search_results.innerHTML = "";
 
   if (!filter) {
+    search_results.innerHTML = "";
     return;
   }
 
@@ -22,7 +22,7 @@ async function filterFunction() {
     console.log(err);
     return;
   }
-
+  search_results.innerHTML = "";
   if (!user_data.length) {
     searchbar_wrapper.className = "searchbar-wrapper";
     return;
