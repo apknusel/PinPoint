@@ -169,3 +169,12 @@ def profile_map(username):
 @app.route("/profile/<username>/settings")
 def profile_settings(username):
     return render_template("profile_settings.html", username=username)
+
+@app.route("/api/search_users")
+def search():
+    print(os.environ.get("DATABASE_UR"))
+    name = request.args.get('name')
+    pool = current_app.config["DB_POOL"]
+    matching_users = db.fetch_users(pool, name)
+    return jsonify(matching_users)
+
