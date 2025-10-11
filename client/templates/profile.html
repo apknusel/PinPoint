@@ -1,7 +1,28 @@
 {% extends '3-5.html' %}
 
 {% block title %}Profile{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
 
 {% block center %}
-	<h1>{{username}}'s Profile</h1>
+  <div class="profile-header">
+    <img class="profile-avatar" src="{{ profile_picture.picture }}" alt="">
+    <span class="profile-username"><h2>{{ username }}'s profile</h2></span>
+  </div>
+	{% if posts %}
+    <div class="pure-g">
+      {% for p in posts %}
+      <div class="pure-u-1-3">
+        <div class="image fill">
+          <a class="post-link" href="{{ url_for('post', post_id=p.post_id) }}">
+            <img src="data:image/jpeg;base64,{{ p.image_data }}" alt="Post image" class="pure-img">
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-posts">No posts</div>
+    {% endif %}
 {% endblock %}

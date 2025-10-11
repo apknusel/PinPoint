@@ -8,8 +8,10 @@
 {% block center %}
 <div class="post-div">
   <div class="post-header">
-    <img class="post-avatar" src="{{ post.picture}}" alt="{{ post.nickname }} profile">
-    <span class="post-username">{{ post.nickname }}</span>
+    <a href="{{ url_for('profile', username=post.nickname) }}">
+      <img class="post-avatar" src="{{ post.picture }}" alt="{{ post.nickname }} profile">
+      <span class="post-username">{{ post.nickname }}</span>
+    </a>
   </div>
   <div class="post-picture">
     <img src="data:image/jpeg;base64,{{ post.image_data }}" alt="Post image">

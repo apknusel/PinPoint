@@ -159,7 +159,10 @@ def profile_root():
 
 @app.route("/profile/<username>")
 def profile(username):
-    return render_template("profile.html", username=username)
+    pool = current_app.config["DB_POOL"]
+    profile_picture = db.fetch_user_profile_image(pool, username)
+    posts = db.fetch_users_post_images(pool, username)
+    return render_template("profile.html", username=username, profile_picture=profile_picture, posts=posts)
 
 @app.route("/profile/<username>/map")
 def profile_map(username):
