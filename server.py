@@ -180,9 +180,13 @@ def profile(username):
     pool = current_app.config["DB_POOL"]
     userinfo = session.get("userinfo")
 
-    is_self = bool(userinfo and (userinfo['nickname'].lower() == username.lower()))
     profile_user = db.fetch_users(pool, username, True)
     followers_data = db.fetch_followers(pool, profile_user[0]['user_id'])
+
+    if userinfo and (userinfo['nickname'].lower() == username.lower()):
+        is_self = True
+    else:
+        is_self = False
 
     if userinfo:
         current_user = userinfo['nickname']
@@ -235,12 +239,10 @@ def render_follow(username):
 def request_follow():
     followee = request.args.get('followee', '')
     info = get_request_info(followee)
-    print(info)
     if info['followee_id'] is None:
         return jsonify({"success": False, "error": "User not found"}), 404
     
     db.follow_request(info['pool'], info['follower_id'], info["followee_id"])
-    print('fires')
     return jsonify({"success": True})
    
 @app.route("/testing", methods=['GET'])
@@ -256,7 +258,6 @@ def follower_request():
     follower = data.get('follower', '')
     followee = data.get('followee', '')
     action = data.get('action', '')
-    pool = current_app.config["DB_POOL"]
     info = get_request_info(followee,follower)
     db.handle_follow_request(info['pool'], info['follower_id'], info['followee_id'], action)
     return jsonify({"success": True})

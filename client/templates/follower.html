@@ -1,156 +1,16 @@
-<style>
-    .request-container::-webkit-scrollbar {
-        width: 5px;
-    }
-
-    .request-container::-webkit-scrollbar-track {
-        background: rgb(179, 177, 177);
-        border-radius: 10px;
-    }
-
-    .request-container::-webkit-scrollbar-thumb {
-        background: rgb(136, 136, 136);
-        border-radius: 10px;
-    }
-
-    .request-container::-webkit-scrollbar-thumb:hover {
-        background: rgb(100, 100, 100);
-        border-radius: 10px;
-    }
-
-    .request-container::-webkit-scrollbar-thumb:active {
-        background: rgb(68, 68, 68);
-        border-radius: 10px;
-    }
-
-    .request-container {
-        padding-left: 25px;
-        width: 312px;
-        height: 340px;
-        overflow: auto;
-    }
-
-    .request-li {
-        display: flex;
-        list-style-type: none;
-        justify-items: center;
-        align-items: center;
-        gap: 5px;
-        height: 65px;
-        border-bottom: 1px solid gray;
-    }
-
-    .request-li img {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-    }
-
-    .user-info-container {
-        width: 150px;
-    }
-
-    .user-info-container h3 {
-        margin-bottom: 0;
-    }
-
-    .user-info-container p {
-        overflow: hidden;
-        margin-top: 0;
-        text-overflow: ellipsis;
-    }
-
-    .button-container {
-        margin-left: 25px;
-    }
-
-    .button-container button {
-        border: 0;
-        width: 30px;
-    }
-
-    .button-container button:hover {
-        border: 0;
-        width: 30px;
-        background-color: #ddd;
-    }
-
-
-
-    .add-follower {
-        background-color: #06f;
-        border: 2px solid #06f;
-        color: #fff;
-        cursor: pointer;
-        font-family: Inter, sans-serif;
-        font-size: 16px;
-        font-weight: 600;
-        height: 28px;
-        justify-content: center;
-        line-height: 24px;
-        padding: 0 8px;
-        transition: all .3s;
-        touch-action: manipulation;
-    }
-
-
-    .add-follower:hover {
-        background-color: #3385ff;
-        border-color: #3385ff;
-        fill: #06f;
-    }
-
-    .add-follower-unauthorized {
-        display: none;
-    }
-
-    .follower-container{
-        padding: 0 20px;
-        display: flex;
-        width: 100%;
-        background-color: grey;
-        flex-wrap: wrap; 
-        gap: 10px;
-        justify-content: flex-start;
-        align-items: flex-start;
-    }
-
-    .follower-entries{
-        background-color: lightblue;
-        display: flex;
-        width: 250px;
-        height: 50px;
-    }
-    .follower-entries h3{
-        display: inline-block;
-        padding: 0;
-        font-size: 12px;
-        margin: 0px;
-    }
-
-    .follower-entries p{
-        padding: 0;
-        font-size: 10px;
-        margin: 0px;
-    }
-    .follower-entries img{
-        width: auto;
-        height: 100%;
-    }
-</style>
 {% if not is_self and current_user %}
-  {% set is_disabled = relation in ["pending", "following"] %}
-  <button id="addFollower" class="add-follower" type="button" {% if is_disabled %}disabled{% endif %} onclick="requestFollowing()">
+{% set is_disabled = relation in ["pending", "following"] %}
+<button id="addFollower" class="add-follower" type="button" {% if is_disabled %}disabled{% endif %}
+    onclick="requestFollowing()">
     {% if relation == "pending" %}
-      pending
+    pending
     {% elif relation == "following" %}
-      following
+    following
     {% else %}
-      + follow
+    + follow
     {% endif %}
-  </button>
+</button>
 {% endif %}
-
 
 {% if is_self %}
 <h2>Pending requests:</h2>
@@ -173,103 +33,33 @@
     </li>
     {% endif %}
     {% endfor %}
-
-
 </ul>
+
 {% endif %}
+<h2>Followers: </h2>
 <div class="follower-container">
-    {% for follower in followers_data.followed_by%}
-    {% if follower['is_accepted']%}
+    {% for follower in followers_data.followed_by %}
+    {% if follower['is_accepted'] %}
     <div class="follower-entries">
-        
         <img src="{{follower['follower_picture']}}" />
-        <h3>{{ follower['follower_name'] }}</h3>
-        <p>{{follower['created_at'] }}</p>
+        <div>
+            <h3>{{ follower['follower_name'] }}</h3>
+            <p>{{follower['created_at'] }}</p>
+        </div>
         {% if is_self %}
         <button value="{{ follower['follower_name'] }}" onclick="requestHandler(event, false)">remove</button>
         {% endif %}
     </div>
      <div class="follower-entries">
         <img src="{{follower['follower_picture']}}" />
-        <a>{{ follower['follower_name'] }}</a>
-        <p>{{follower['created_at'] }}</p>
+        <div>
+            <h3>{{ follower['follower_name'] }}</h3>
+            <p>{{follower['created_at'] }}</p>
+        </div>
         {% if is_self %}
         <button value="{{ follower['follower_name'] }}" onclick="requestHandler(event, false)">remove</button>
         {% endif %}
-    </div>
-     <div class="follower-entries">
-        <img src="{{follower['follower_picture']}}" />
-        <a>{{ follower['follower_name'] }}</a>
-        <p>{{follower['created_at'] }}</p>
-        {% if is_self %}
-        <button value="{{ follower['follower_name'] }}" onclick="requestHandler(event, false)">remove</button>
-        {% endif %}
-    </div>
-     <div class="follower-entries">
-        <img src="{{follower['follower_picture']}}" />
-        <a>{{ follower['follower_name'] }}</a>
-        <p>{{follower['created_at'] }}</p>
-        {% if is_self %}
-        <button value="{{ follower['follower_name'] }}" onclick="requestHandler(event, false)">remove</button>
-        {% endif %}
-    </div>
-    
+    </div> 
     {% endif %}
     {% endfor %}
 </div>
-<script>
-    const user_url = new URL(window.location.href);
-    const pathParts = window.location.pathname.split("/");
-
-    const input = document.getElementById('followeeName');
-    const add_follower = document.getElementById('addFollower');
-
-
-    async function requestFollowing() {
-        followee_name = pathParts[2];
-        console.log(url);
-        console.log(followee_name);
-
-        try {
-            const response = await fetch(`/follower?followee=${followee_name}`, { method: "POST" });
-            const data = await response.json();
-
-            if (!response.ok)
-                throw new Error(data.error || "Server Error");
-
-        } catch (e) {
-            console.log(e.message);
-            if (String(e.message) == "User not found") {
-                console.log('fire');
-                input.className = "followee-name-error"
-            }
-
-        }
-        add_follower.innerHTML = "pending"
-    }
-
-    async function requestHandler(event, action) {
-        followee_name = pathParts[2];
-        const li = event.currentTarget.closest('li');
-        follower_name = event.target.value;
-        try {
-            const response = await fetch("/follower_request", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ follower: follower_name, followee: followee_name, action: action })
-            });
-
-            const data = await response.json();
-            if (!response.ok)
-                throw new Error(data.error || "Server Error");
-
-            (event.target.closest('li') || event.target.closest('div'))?.remove();
-
-        } catch (e) {
-            console.log(e.message);
-        }
-        document.addEventListener('DOMContentLoaded', () => {
-
-        });
-    }
-</script>
