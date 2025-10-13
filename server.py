@@ -229,8 +229,8 @@ def search():
     matching_users = db.fetch_users(pool, name)
     return jsonify(matching_users)
 
-@app.route("/follower", methods=['POST'])
-def request_follow():
+@app.route("/follower_request_create", methods=['POST'])
+def follower_request_creation():
     followee = request.args.get('followee', '')
     info = get_request_info(followee)
     if info['followee_id'] is None:
@@ -239,8 +239,8 @@ def request_follow():
     db.follow_request(info['pool'], info['follower_id'], info["followee_id"])
     return jsonify({"success": True})
    
-@app.route("/follower_request", methods=["POST"])
-def follower_request():
+@app.route("/follower_request_handler", methods=["POST"])
+def follower_request_handler():
     data = request.get_json()
     follower = data.get('follower', '')
     followee = data.get('followee', '')

@@ -8,7 +8,7 @@ const add_follower = document.getElementById('addFollower');
 async function requestFollowing() {
     followee_name = pathParts[2];
     try {
-        const response = await fetch(`/follower?followee=${followee_name}`, { method: "POST" });
+        const response = await fetch(`/follower_request_create?followee=${followee_name}`, { method: "POST" });
         const data = await response.json();
 
         if (!response.ok)
@@ -25,7 +25,7 @@ async function requestHandler(event, action) {
     const li = event.currentTarget.closest('li');
     follower_name = event.target.value;
     try {
-        const response = await fetch("/follower_request", {
+        const response = await fetch("/follower_request_handler", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ follower: follower_name, followee: followee_name, action: action })
