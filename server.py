@@ -182,34 +182,35 @@ def profile(username):
 
     profile_user = db.fetch_users(pool, username, True)
     followers_data = db.fetch_followers(pool, profile_user[0]['user_id'])
-
-    if userinfo and (userinfo['nickname'].lower() == username.lower()):
-        is_self = True
-    else:
-        is_self = False
-
-    if userinfo:
-        current_user = userinfo['nickname']
-    else:
-        current_user = False
+    profile_picture = db.fetch_user_profile_image(pool, username)
+    posts = db.fetch_users_post_images(pool, username)
 
     relation = None
-    for follower_by in followers_data['followed_by']:
-        if follower_by['follower_id'] == userinfo['sub']:
-            if not follower_by['is_accepted']:
-                relation = "pending" 
-            else:
-                relation = "following"
-            break
+    is_self = False
+    current_user = False
 
+    if userinfo:
+        for follower_by in followers_data['followed_by']:
+            if follower_by['follower_id'] == userinfo['sub']:
+                if not follower_by['is_accepted']:
+                    relation = "pending" 
+                else:
+                    relation = "following"
+                break
+        current_user = userinfo['nickname']
+        if current_user.lower() == username.lower():
+            is_self = True
 
     return render_template("profile.html",
                             username=username, 
                             is_self=is_self,
                             current_user=current_user, 
                             followers_data=followers_data,
-                            relation=relation)
+                            relation=relation,
+                            profile_picture=profile_picture,
+                            posts=posts)
 
+    
 
 @app.route("/profile/<username>/map")
 def profile_map(username):
@@ -228,13 +229,6 @@ def search():
     matching_users = db.fetch_users(pool, name)
     return jsonify(matching_users)
 
-@app.route("/profile/<username>/follower")
-def render_follow(username):
-    if not session.get("userinfo"):
-        return redirect(url_for("login"))
-    userinfo = session["userinfo"]
-    return render_template('follower.html', username=userinfo.get("nickname"))
-
 @app.route("/follower", methods=['POST'])
 def request_follow():
     followee = request.args.get('followee', '')
@@ -245,13 +239,6 @@ def request_follow():
     db.follow_request(info['pool'], info['follower_id'], info["followee_id"])
     return jsonify({"success": True})
    
-@app.route("/testing", methods=['GET'])
-def check_follow_status():
-    followee = request.args.get('followee', '')
-    info = get_request_info(followee)
-    followers = db.fetch_followers(info['pool'], info['followee_id'])
-    return jsonify(followers)
-
 @app.route("/follower_request", methods=["POST"])
 def follower_request():
     data = request.get_json()
@@ -268,8 +255,6 @@ def get_request_info(followee, follower=None):
     userinfo = session.get("userinfo")
 
     result = {
-            "sucess": False,
-            "error": None,
             "follower_id": None,
             "followee_id": None,
             "pool": pool
@@ -279,9 +264,7 @@ def get_request_info(followee, follower=None):
         matching_follower = db.fetch_users(pool, follower, True)
         if matching_follower:
             result["follower_id"] = matching_follower[0]['user_id']
-        else:
-            result["error"] = "Follower not found"
-            return result
+      
     elif userinfo:
         result["follower_id"] = userinfo.get("sub")
     else:
@@ -294,7 +277,6 @@ def get_request_info(followee, follower=None):
     else:
         result["followee_id"] = None
 
-    result['sucess'] = True
     return result
 
 

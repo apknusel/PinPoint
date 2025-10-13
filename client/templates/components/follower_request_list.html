@@ -1,0 +1,25 @@
+{% if is_self %}
+<div class="pure-u-1-4">
+    <h2>Pending requests:</h2>
+    <ul class="request-container">
+        {% for follower in followers_data.followed_by %}
+        {% if not follower['is_accepted']%}
+        <li class="request-li">
+            <img src="{{follower['follower_picture']}}" />
+            <div class="user-info-container">
+                <h3>{{follower['follower_name']}}</h3>
+                <p>{{follower['follower_email']}}</p>
+            </div>
+            <div class="button-container">
+                <button type="button" value="{{ follower['follower_name'] }}"
+                    onclick="requestHandler(event, true)">✓</button>
+                <button type="button" value="{{ follower['follower_name'] }}"
+                    onclick="requestHandler(event, false)">x</button>
+            </div>
+        </li>
+        {% endif %}
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+<script src="{{ url_for('static', filename='js/follower.js') }}"></script>

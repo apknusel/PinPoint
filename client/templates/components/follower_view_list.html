@@ -1,0 +1,16 @@
+<h2>Followers: </h2>
+{% for follower in followers_data.followed_by %}
+{% if follower['is_accepted'] %}
+    <div class="follower-entries">
+        <img src="{{follower['follower_picture']}}" />
+        <div>
+            <h3>{{ follower['follower_name'] }}</h3>
+            <p>{{follower['created_at'] }}</p>
+        </div>
+        {% if is_self %}
+        <button value="{{ follower['follower_name'] }}" onclick="requestHandler(event, false)">remove</button>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% endfor %}
+<script src="{{ url_for('static', filename='js/follower.js') }}"></script>

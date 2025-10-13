@@ -3,30 +3,31 @@
 }
 
 .request-container::-webkit-scrollbar-track {
-    background: rgb(179, 177, 177);
+    background: var(--follower-request-scroll-track);
     border-radius: 10px;
 }
 
 .request-container::-webkit-scrollbar-thumb {
-    background: rgb(136, 136, 136);
+    background: var(--follower-request-scroll-thumb);
     border-radius: 10px;
 }
 
 .request-container::-webkit-scrollbar-thumb:hover {
-    background: rgb(100, 100, 100);
+    background: var(--follower-request-scroll-thumb-hover);
     border-radius: 10px;
 }
 
 .request-container::-webkit-scrollbar-thumb:active {
-    background: rgb(68, 68, 68);
+    background: var(--follower-request-scroll-thumb-active);
     border-radius: 10px;
 }
 
 .request-container {
     padding-left: 25px;
-    width: 312px;
+    width: 270px;
     height: 340px;
     overflow: auto;
+    padding-left: 0px;
 }
 
 .request-li {
@@ -36,7 +37,7 @@
     align-items: center;
     gap: 5px;
     height: 65px;
-    border-bottom: 1px solid gray;
+    border-bottom: 1px solid var(--follower-request-li-border);
 }
 
 .request-li img {
@@ -60,25 +61,25 @@
 }
 
 .button-container {
-    margin-left: 25px;
+    margin-left: 22px;
 }
 
 .button-container button {
     border: 0;
-    width: 30px;
+    width: 28px;
 }
 
 .button-container button:hover {
     border: 0;
+    margin-left:-1px;
     width: 30px;
     background-color: #ddd;
 }
 
-
-
 .add-follower {
-    background-color: #06f;
-    border: 2px solid #06f;
+    margin-left: 20px;
+    background-color: var(--follower-add-btn);
+    border: 2px solid var(--follower-add-btn);
     color: #fff;
     cursor: pointer;
     font-family: Inter, sans-serif;
@@ -92,11 +93,9 @@
     touch-action: manipulation;
 }
 
-
 .add-follower:hover {
-    background-color: #3385ff;
-    border-color: #3385ff;
-    fill: #06f;
+    background-color: var(--follower-add-btn-hover);
+    border-color: var(--follower-add-btn-hover);
 }
 
 .add-follower-unauthorized {
@@ -117,13 +116,12 @@
     border-width: 2px;
     border-style: solid;
     display: flex;
-    width: 250px;
+    width: 290px;
     height: 50px;
     justify-items: center;
     align-items: center;
     gap: 10px;
 }
-
 
 .follower-entries h3 {
     display: inline-block;
@@ -148,11 +146,11 @@
     border-radius: 2rem;
     margin-left: 35px;
     height: 35px;
-    background-color: white;
-    border-color: white;
+    background-color: var(--follower-view-btn);
+    border-color: var(--follower-view-btn);
     font-size: 13px;
 }
 
 .follower-entries button:hover {
-    background-color: grey;
+    background-color: var(follower-view-btn-hover);
 }

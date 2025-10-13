@@ -7,7 +7,6 @@ const add_follower = document.getElementById('addFollower');
 
 async function requestFollowing() {
     followee_name = pathParts[2];
-
     try {
         const response = await fetch(`/follower?followee=${followee_name}`, { method: "POST" });
         const data = await response.json();

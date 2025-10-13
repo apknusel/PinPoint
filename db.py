@@ -116,6 +116,54 @@ def fetch_single_post(pool, post_id):
     finally:
         pool.putconn(conn)
 
+def fetch_user_profile_image(pool, nickname):
+    conn = pool.getconn()
+    try:
+        with conn.cursor(cursor_factory=DictCursor) as cur:
+            cur.execute(
+                """
+                SELECT u.picture
+                FROM Users u
+                WHERE u.nickname = %s
+                """,
+                (nickname,)
+            )
+            row = cur.fetchone()
+            if not row:
+                return None
+            return { "picture": row["picture"] }
+    finally:
+        pool.putconn(conn)
+
+def fetch_users_post_images(pool, nickname):
+    conn = pool.getconn()
+    try:
+        with conn.cursor(cursor_factory=DictCursor) as cur:
+            cur.execute(
+                """
+                SELECT p.post_id,
+                       p.user_id,
+                       u.nickname,
+                       m.file_data
+                FROM Users u
+                JOIN Posts p ON p.user_id = u.user_id
+                LEFT JOIN Media m ON m.post_id = p.post_id
+                WHERE u.nickname = %s
+                ORDER BY p.created_at DESC
+                """,
+                (nickname,)
+            )
+            rows = cur.fetchall()
+        return [
+                {
+                "post_id": r["post_id"],
+                "image_data": base64.b64encode(r["file_data"]).decode("utf-8")
+            }
+            for r in rows
+        ]
+    finally:
+        pool.putconn(conn)
+
 def insert_comment(pool, comment_id, comment, post_id, user_id):
     conn = pool.getconn()
     try:

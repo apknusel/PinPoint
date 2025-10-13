@@ -1,8 +1,41 @@
 {% extends '3-5.html' %}
 
 {% block title %}Profile{% endblock %}
+{% block script %}
+{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/follower.css') }}">
+{% endblock %}
 
 {% block center %}
-	<h1>{{username}}'s Profile</h1>
-	{% include 'follower.html'%}
+<div class="profile-header">
+  <img class="profile-avatar" src="{{ profile_picture.picture }}" alt="">
+  <span class="profile-username">
+    <h2>{{ username }}'s profile</h2>
+  </span>
+  {% include "./components/follower_add_btn.html"%}
+</div>
+
+{% if posts %}
+<div class="pure-g">
+  {% for p in posts %}
+  <div class="pure-u-1-4">
+    <div class="image fill">
+      <a class="post-link" href="{{ url_for('post', post_id=p.post_id) }}">
+        <img src="data:image/jpeg;base64,{{ p.image_data }}" alt="Post image" class="pure-img">
+      </a>
+    </div>
+    {% endfor %}
+
+  </div>
+</div>
+{% else %}
+<div class="no-posts pure-u-3-4">No posts</div>
+{% endif %}
+{% include "./components/follower_view_list.html" %}
+{% endblock %}
+
+{% block right %}
+{% include "./components/follower_request_list.html" %}
 {% endblock %}
