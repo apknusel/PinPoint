@@ -2,7 +2,7 @@ from psycopg2.pool import ThreadedConnectionPool
 from psycopg2.extras import DictCursor
 import base64
 
-def init_pool(dsn, minconn = 1, maxconn = 100):
+def init_pool(dsn, minconn=1, maxconn=100):
     return ThreadedConnectionPool(minconn, maxconn, dsn=dsn, sslmode="require")
 
 def upsert_user(pool, user_id, nickname, email, picture):
@@ -77,7 +77,7 @@ def insert_post_with_media(pool, post_id, caption, user_id, lng, lat, media_id, 
         conn.commit()
     finally:
         pool.putconn(conn)
-        
+
 def fetch_single_post(pool, post_id):
     conn = pool.getconn()
     try:
@@ -115,7 +115,7 @@ def fetch_single_post(pool, post_id):
             }
     finally:
         pool.putconn(conn)
-        
+
 def insert_comment(pool, comment_id, comment, post_id, user_id):
     conn = pool.getconn()
     try:
@@ -130,7 +130,7 @@ def insert_comment(pool, comment_id, comment, post_id, user_id):
         conn.commit()
     finally:
         pool.putconn(conn)
-        
+
 def fetch_comments(pool, post_id):
     conn = pool.getconn()
     try:
@@ -164,18 +164,121 @@ def fetch_comments(pool, post_id):
     finally:
         pool.putconn(conn)
 
-def fetch_users(pool, name):
+def fetch_users(pool, name, exact_match=False):
+    conn = pool.getconn()
+    try:
+        with conn.cursor(cursor_factory=DictCursor) as cur:
+            if (exact_match):
+                cur.execute(
+                    """
+                SELECT user_id, nickname, picture 
+                FROM users WHERE LOWER(nickname) = LOWER(%s)
+                """,
+                    (name,)
+                )
+            else:
+                cur.execute(
+                    """
+                SELECT user_id, nickname, picture
+                FROM users WHERE nickname ILIKE %s
+                """,
+                    (f"%{name}%",)
+                )
+
+            rows = cur.fetchall()
+            return [dict(row) for row in rows]
+    finally:
+        pool.putconn(conn)
+
+def follow_request(pool, follower_id, followee_id):
     conn = pool.getconn()
     try:
         with conn.cursor(cursor_factory=DictCursor) as cur:
             cur.execute(
             """
-            SELECT user_id, nickname, picture
-            FROM users WHERE nickname ILIKE %s
+            INSERT INTO followers (follower_id, followee_id, is_accepted)
+            VALUES (%s, %s, FALSE) ON CONFLICT (follower_id, followee_id) DO NOTHING
             """,
-            (f"%{name}%",)
-        )
-            rows = cur.fetchall()
-            return [dict(row) for row in rows]
+                (follower_id, followee_id)
+            )
+        conn.commit()
     finally:
         pool.putconn(conn)
+
+def fetch_followers(pool, user_id):
+    conn = pool.getconn()
+    try:
+        with conn.cursor(cursor_factory=DictCursor) as cur:
+            cur.execute(
+                """
+                SELECT 
+                f.follower_id,
+                u1.nickname AS follower_name,
+                u1.picture  AS follower_picture,
+                u1.email AS follower_email,
+                f.followee_id,
+                u2.nickname AS followee_name,
+                f.is_accepted,
+                f.created_at
+                FROM followers f
+                LEFT JOIN users u1 ON f.follower_id = u1.user_id
+                LEFT JOIN users u2 ON f.followee_id = u2.user_id
+                WHERE %s IN (f.followee_id, f.follower_id)
+                """,
+                (user_id,)
+            )
+            rows = cur.fetchall()
+
+        result = {
+            "following_to": [],
+            "followed_by": [],
+        }
+        for row in rows:
+            if row['follower_id'] == user_id:
+                result["following_to"].append({
+                    "followee_id": row['followee_id'],
+                    "followee_name": row['followee_name'],
+                    "is_accepted": row['is_accepted'],
+                    "created_at": row['created_at'].strftime("%b %d, %Y")
+                })
+            elif row['followee_id'] == user_id:
+                 result["followed_by"].append({
+                    "follower_picture": row['follower_picture'],
+                    "follower_email": row['follower_email'],
+                    "follower_id": row['follower_id'],
+                    "follower_name": row['follower_name'],
+                    "is_accepted": row['is_accepted'],
+                    "created_at": row['created_at'].strftime("%b %d, %Y")
+                })
+        return result
+    finally:
+        pool.putconn(conn)
+
+def handle_follow_request(pool, follower_id , followee_id, accept=False):
+    conn = pool.getconn()
+    print(accept)
+    print("folower:" , follower_id)
+    print("folowee:", followee_id)
+    try:
+        with conn.cursor(cursor_factory=DictCursor) as cur:
+            if accept == True:
+                cur.execute(
+                    """
+                    UPDATE followers
+                    SET is_accepted = TRUE
+                    WHERE follower_id = %s AND followee_id = %s
+                    """,
+                    (follower_id, followee_id)
+                )
+            elif accept == False:
+                cur.execute(
+                """
+                DELETE FROM followers
+                WHERE follower_id = %s AND followee_id = %s
+                """,
+                (follower_id, followee_id)
+                )
+            conn.commit()
+    finally:
+        pool.putconn(conn)
+
