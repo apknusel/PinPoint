@@ -152,5 +152,5 @@
 }
 
 .follower-entries button:hover {
-    background-color: var(follower-view-btn-hover);
+    background-color: var(--follower-view-btn-hover);
 }
