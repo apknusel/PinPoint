@@ -25,15 +25,20 @@
 <div class="container">
 	<h2>Post Details</h2>
 	<form class="pure-form pure-form-stacked" action="/create/post" method="post" enctype="multipart/form-data">
-		<label for="image">Image
-			<input type="file" id="image" name="image" accept="image/*" required>
-		</label>
+		<label for="image" hidden>Image</label>
+		<div class="upload-control">
+			<label class="pure-button pure-button-primary" for="image" hidd>Choose image</label>
+			<input type="file" id="image" name="image" accept="image/*" class="file-input" required hidden>
+			<span id="fileName" class="file-name">No file chosen</span>
+		</div>
 		<div class="image-preview-wrapper">
+			<span class="image-preview-placeholder">Image preview</span>
 			<img id="imagePreview" class="image-preview" alt="Selected image preview" />
 		</div>
-		<label for="caption">Caption
-			<textarea id="caption" name="caption" rows="6" required></textarea>
-		</label>
+
+		<label for="caption" hidden>Caption</label>
+		<input id="caption" name="caption" type="text" class="caption-input" placeholder="Write a caption..." required />
+
 		<input type="hidden" name="latitude" id="latitude">
 		<input type="hidden" name="longitude" id="longitude">
 		<button type="submit" class="pure-button pure-button-primary" disabled id="submitBtn">Create Post</button>
