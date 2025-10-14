@@ -33,9 +33,12 @@
 {% else %}
 <div class="no-posts pure-u-3-4">No posts</div>
 {% endif %}
-{% include "./components/follower_view_list.html" %}
 {% endblock %}
 
 {% block right %}
 {% include "./components/follower_request_list.html" %}
+{% endblock %}
+
+{% block bottom %}
+{% include "./components/follower_view_list.html" %}
 {% endblock %}

@@ -11,6 +11,6 @@
         <button value="{{ follower['follower_name'] }}" onclick="requestHandler(event, false)">remove</button>
         {% endif %}
     </div>
-    {% endif %}
-    {% endfor %}
+{% endif %}
+{% endfor %}
 <script src="{{ url_for('static', filename='js/follower.js') }}"></script>
