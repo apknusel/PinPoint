@@ -1,6 +1,6 @@
 {% if is_self %}
 <div class="pure-u-1-4">
-    <h2>Pending requests:</h2>
+    <h2>Requests:</h2>
     <ul class="request-container">
         {% for follower in followers_data.followed_by %}
         {% if not follower['is_accepted']%}
