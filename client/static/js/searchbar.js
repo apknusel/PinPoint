@@ -2,15 +2,19 @@
 const url = "/profile/__name__";
 const search_input = document.getElementById('searchInput');
 const search_results = document.getElementById('searchbarDropdown');
-const searchbar_wrapper = document.getElementById('searchbarWrapper');
+
+// Hide dropdown initially
+search_results.style.display = "none";
+
 search_input.addEventListener('input', filterFunction);
 
 async function filterFunction() {
   let user_data = [];
   const filter = search_input.value;
-  search_results.innerHTML = "";
 
   if (!filter) {
+    search_results.innerHTML = "";
+    search_results.style.display = "none";
     return;
   }
 
@@ -20,18 +24,29 @@ async function filterFunction() {
     user_data = await response.json();
   } catch (err) {
     console.log(err);
+    search_results.innerHTML = "";
+    search_results.style.display = "none";
+    return;
+  }
+
+  // Clear results after fetch completes to prevent race condition duplicates
+  search_results.innerHTML = "";
+  search_results.style.display = "none";
+
+  // Check if search input has changed while request was in flight
+  if (search_input.value !== filter) {
     return;
   }
 
   if (!user_data.length) {
-    searchbar_wrapper.className = "searchbar-wrapper";
     return;
   }
 
   for (const { user_id, nickname, picture } of user_data) {
-    user = createElement(nickname, picture);
+    const user = createElement(nickname, picture);
     search_results.append(user);
   }
+  search_results.style.display = "block";
 }
 
 function createElement(name, picture) {
