@@ -40,7 +40,6 @@ def ensure_logged_in_user():
     if not userinfo:
         return None
     pool = current_app.config["DB_POOL"]
-    print(userinfo)
     user_id = userinfo.get("sub")
     nickname = userinfo.get("nickname") or None
     email = userinfo.get("email") or None
@@ -181,7 +180,6 @@ def profile_settings(username):
 
 @app.route("/api/search_users")
 def search():
-    print(os.environ.get("DATABASE_UR"))
     name = request.args.get('name')
     pool = current_app.config["DB_POOL"]
     matching_users = db.fetch_users(pool, name)
