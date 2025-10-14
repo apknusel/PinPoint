@@ -22,10 +22,16 @@ async function filterFunction() {
     console.log(err);
     return;
   }
+  
+  search_results.innerHTML = "";
 
   search_results.innerHTML = "";
   if (!user_data.length) {
     searchbar_wrapper.className = "searchbar-wrapper";
+    const empty = document.createElement('div');
+    empty.className = 'dropdown-entries';
+    empty.innerText = 'No results';
+    search_results.appendChild(empty);
     return;
   }
 

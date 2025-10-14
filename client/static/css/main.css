@@ -21,14 +21,108 @@
   --follower-request-scroll-thumb-active: #444444;
   --follower-view-btn: white;
   --follower-view-btn-hover: grey;
+  
+  /* Navbar and text colors */
+  --text-color: #333;
+  --text-color-hover: #000;
+  --link-color: #0066cc;
+  --border-color: #ccc;
+  --background-white: white;
 }
 
-.nav-list .login-item {
-  margin-left: auto;
+/* Navbar Grid Layout */
+.nav-wrapper {
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--background-white);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  height: 50px;
 }
 
-/* there is probably a better way to do this */
+.nav-grid {
+  align-items: center;
+  padding: 0 16px;
+  height: 100%;
+}
+
+.nav-grid > div {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.nav-left {
+  gap: 12px;
+}
+
+.nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  padding: 4px 8px;
+  color: var(--text-color);
+  transition: color 0.2s ease;
+}
+
+.nav-icon:hover {
+  color: var(--text-color-hover);
+}
+
+.nav-icon svg {
+  display: block;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: var(--text-color);
+  font-size: 14px;
+}
+
+.nav-link:hover {
+  color: var(--text-color-hover);
+}
+
+.nav-center {
+  justify-content: center;
+}
+
+.nav-right {
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+/* Navbar text elements */
+.nav-status,
+.nav-message {
+  color: var(--text-color);
+  font-size: 14px;
+}
+
+/* Navbar blue links */
+.nav-button,
+.nav-login-link {
+  text-decoration: none;
+  color: var(--link-color);
+  font-size: 14px;
+}
+
+.nav-button:hover,
+.nav-login-link:hover {
+  text-decoration: underline;
+}
+
+/* Map sizing to fit viewport without scrollbars */
 #map {
   width: 100vw;
-  height: calc(100vh - 34.4px);
+  height: calc(100vh - 51px); /* 50px navbar + 1px border */
+}
+
+/* Prevent scrollbars */
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100vh;
 }

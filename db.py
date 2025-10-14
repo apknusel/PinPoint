@@ -272,6 +272,42 @@ def fetch_users(pool, name, exact_match=False):
     finally:
         pool.putconn(conn)
 
+def fetch_nearest_posts(pool, post_id, k=5):
+    conn = pool.getconn()
+    try:
+        with conn.cursor(cursor_factory=DictCursor) as cur:
+            cur.execute(
+                """
+                SELECT 
+                    p2.post_id,
+                    p2.caption,
+                    u.nickname,
+                    m.file_data
+                FROM Posts p1
+                JOIN Posts p2 ON p2.post_id <> p1.post_id
+                JOIN Users u ON u.user_id = p2.user_id
+                LEFT JOIN Media m ON m.post_id = p2.post_id
+                WHERE p1.post_id = %s
+                  AND p1.location IS NOT NULL
+                  AND p2.location IS NOT NULL
+                ORDER BY p2.location <-> p1.location
+                LIMIT %s
+                """,
+                (post_id, k),
+            )
+            rows = cur.fetchall()
+            return [
+                {
+                    "post_id": r["post_id"],
+                    "caption": r["caption"],
+                    "nickname": r["nickname"],
+                    "image_data": base64.b64encode(r["file_data"]).decode("utf-8") if r["file_data"] else None,
+                }
+                for r in rows
+            ]
+    finally:
+        pool.putconn(conn)
+
 def follow_request(pool, follower_id, followee_id):
     conn = pool.getconn()
     try:
