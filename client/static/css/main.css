@@ -10,6 +10,17 @@
   --searchbar-color-selected: #5080e1;
   --dropdown-color: #F4F1F0;
   --dropdown-color-selected: #ddd;
+
+  --follower-add-btn: #06f;
+  --follower-add-btn-hover: #3385ff; 
+  --follower-request-aptBtn-hover: #ddd;  
+  --follower-request-li-border:gray; 
+  --follower-request-scroll-track: #B3B1B1;
+  --follower-request-scroll-thumb: #888888;
+  --follower-request-scroll-thumb-hover: #646464;
+  --follower-request-scroll-thumb-active: #444444;
+  --follower-view-btn: #F4F1F0;
+  --follower-view-btn-hover: #ddd;
   
   /* Navbar and text colors */
   --text-color: #333;

@@ -1,0 +1,14 @@
+{% if not is_self and current_user %}
+{% set is_disabled = relation in ["pending", "following"] %}
+<button id="addFollower" class="add-follower" type="button" {% if is_disabled %}disabled{% endif %}
+    onclick="requestFollowing()">
+    {% if relation == "pending" %}
+    pending
+    {% elif relation == "following" %}
+    following
+    {% else %}
+    + follow
+    {% endif %}
+</button>
+{% endif %}
+<script src="{{ url_for('static', filename='js/follower.js') }}"></script>

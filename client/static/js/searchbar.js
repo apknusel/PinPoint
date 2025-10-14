@@ -8,9 +8,9 @@ search_input.addEventListener('input', filterFunction);
 async function filterFunction() {
   let user_data = [];
   const filter = search_input.value;
-  search_results.innerHTML = "";
-
+  
   if (!filter) {
+    search_results.innerHTML = "";
     return;
   }
 

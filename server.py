@@ -10,11 +10,14 @@ load_dotenv()
 
 oauth = None
 
+
 def setup():
     global oauth
     app.secret_key = os.environ.get("APP_SECRET_KEY")
-    current_app.config["GOOGLE_MAPS_API_KEY"] = os.environ.get("GOOGLE_MAPS_API_KEY")
-    current_app.config["DB_POOL"] = db.init_pool(os.environ.get("DATABASE_URL"))
+    current_app.config["GOOGLE_MAPS_API_KEY"] = os.environ.get(
+        "GOOGLE_MAPS_API_KEY")
+    current_app.config["DB_POOL"] = db.init_pool(
+        os.environ.get("DATABASE_URL"))
     oauth = OAuth(app)
     oauth.register(
         "auth0",
@@ -26,6 +29,7 @@ def setup():
         server_metadata_url=f'https://{os.environ.get("AUTH0_DOMAIN")}/.well-known/openid-configuration'
     )
 
+
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 CLIENT_DIR = os.path.join(BASE_DIR, "client")
 
@@ -34,6 +38,7 @@ app = Flask(
     template_folder=os.path.join(CLIENT_DIR, "templates"),
     static_folder=os.path.join(CLIENT_DIR, "static"),
 )
+
 
 def ensure_logged_in_user():
     userinfo = session.get("userinfo")
@@ -47,18 +52,22 @@ def ensure_logged_in_user():
     db.upsert_user(pool, user_id, nickname, email, picture)
     return user_id
 
+
 with app.app_context():
     setup()
+
 
 @app.context_processor
 def inject_google_maps_key():
     return {"google_maps_api_key": current_app.config.get("GOOGLE_MAPS_API_KEY")}
+
 
 @app.route("/login")
 def login():
     return oauth.auth0.authorize_redirect(
         redirect_uri=url_for("callback", _external=True)
     )
+
 
 @app.route("/logout")
 def logout():
@@ -75,9 +84,10 @@ def logout():
         },
         quote_via=quote_plus,
     )
-    
+
     logout_url = f"https://{domain}/v2/logout?{params}"
     return redirect(logout_url)
+
 
 @app.route("/callback", methods=["GET", "POST"])
 def callback():
@@ -90,6 +100,7 @@ def callback():
     session["user"] = token
     ensure_logged_in_user()
     return redirect(url_for("index"))
+
 
 @app.route("/api/posts")
 def get_posts():
@@ -115,9 +126,11 @@ def add_comment(post_id):
     db.insert_comment(pool, comment_id, comment, post_id, user_id)
     return redirect(url_for("post", post_id=post_id))
 
+
 @app.route("/")
 def index():
     return render_template("index.html")
+
 
 @app.route("/post/<post_id>")
 def post(post_id):
@@ -126,6 +139,7 @@ def post(post_id):
     comments = db.fetch_comments(pool, post_id)
     recommended_posts = db.fetch_nearest_posts(pool, post_id, k=5)
     return render_template("post.html", post=post, comments=comments, recommended_posts=recommended_posts)
+
 
 @app.route("/create/post", methods=["GET", "POST"])
 def create_post():
@@ -152,8 +166,10 @@ def create_post():
     file_bytes = file.read()
     file_name = file.filename
     pool = current_app.config["DB_POOL"]
-    db.insert_post_with_media(pool, post_id, caption, user_id, lng_f, lat_f, media_id, file_name, file_bytes)
+    db.insert_post_with_media(
+        pool, post_id, caption, user_id, lng_f, lat_f, media_id, file_name, file_bytes)
     return redirect(url_for("post", post_id=post_id))
+
 
 @app.route("/profile")
 def profile_root():
@@ -162,12 +178,43 @@ def profile_root():
     userinfo = session["userinfo"]
     return redirect(url_for("profile", username=userinfo.get("nickname")))
 
+
 @app.route("/profile/<username>")
 def profile(username):
     pool = current_app.config["DB_POOL"]
+    userinfo = session.get("userinfo")
+
+    profile_user = db.fetch_users(pool, username, True)
+    followers_data = db.fetch_followers(pool, profile_user[0]['user_id'])
     profile_picture = db.fetch_user_profile_image(pool, username)
     posts = db.fetch_users_post_images(pool, username)
-    return render_template("profile.html", username=username, profile_picture=profile_picture, posts=posts)
+
+    relation = None
+    is_self = False
+    current_user = False
+
+    if userinfo:
+        for follower_by in followers_data['followed_by']:
+            if follower_by['follower_id'] == userinfo['sub']:
+                if not follower_by['is_accepted']:
+                    relation = "pending" 
+                else:
+                    relation = "following"
+                break
+        current_user = userinfo['nickname']
+        if current_user.lower() == username.lower():
+            is_self = True
+
+    return render_template("profile.html",
+                            username=username, 
+                            is_self=is_self,
+                            current_user=current_user, 
+                            followers_data=followers_data,
+                            relation=relation,
+                            profile_picture=profile_picture,
+                            posts=posts)
+
+    
 
 @app.route("/profile/<username>/map")
 def profile_map(username):
@@ -178,10 +225,63 @@ def profile_map(username):
 def profile_settings(username):
     return render_template("profile_settings.html", username=username)
 
+
 @app.route("/api/search_users")
 def search():
     name = request.args.get('name')
     pool = current_app.config["DB_POOL"]
     matching_users = db.fetch_users(pool, name)
     return jsonify(matching_users)
+
+@app.route("/follower_request_create", methods=['POST'])
+def follower_request_creation():
+    followee = request.args.get('followee', '')
+    info = get_request_info(followee)
+    if info['followee_id'] is None:
+        return jsonify({"success": False, "error": "User not found"}), 404
+    
+    db.follow_request(info['pool'], info['follower_id'], info["followee_id"])
+    return jsonify({"success": True})
+   
+@app.route("/follower_request_handler", methods=["POST"])
+def follower_request_handler():
+    data = request.get_json()
+    follower = data.get('follower', '')
+    followee = data.get('followee', '')
+    action = data.get('action', '')
+    info = get_request_info(followee,follower)
+    db.handle_follow_request(info['pool'], info['follower_id'], info['followee_id'], action)
+    return jsonify({"success": True})
+
+def get_request_info(followee, follower=None):
+    followee = followee.strip()
+    pool = current_app.config["DB_POOL"]
+    userinfo = session.get("userinfo")
+
+    result = {
+            "follower_id": None,
+            "followee_id": None,
+            "pool": pool
+        }
+    
+    if follower:
+        matching_follower = db.fetch_users(pool, follower, True)
+        if matching_follower:
+            result["follower_id"] = matching_follower[0]['user_id']
+      
+    elif userinfo:
+        result["follower_id"] = userinfo.get("sub")
+    else:
+        result["follower_id"] = None
+
+    matching_followee = db.fetch_users(pool, followee, True)
+
+    if matching_followee:
+        result["followee_id"] = matching_followee[0]['user_id']
+    else:
+        result["followee_id"] = None
+
+    return result
+
+
 
