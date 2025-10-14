@@ -125,7 +125,8 @@ def post(post_id):
     pool = current_app.config["DB_POOL"]
     post = db.fetch_single_post(pool, post_id)
     comments = db.fetch_comments(pool, post_id)
-    return render_template("post.html", post=post, comments=comments)
+    recommended_posts = db.fetch_nearest_posts(pool, post_id, k=5)
+    return render_template("post.html", post=post, comments=comments, recommended_posts=recommended_posts)
 
 @app.route("/create/post", methods=["GET", "POST"])
 def create_post():
