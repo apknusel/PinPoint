@@ -1,7 +1,15 @@
-{% extends '3-5.html' %}
+{% extends 'full_page.html' %}
+{% block title %}{{username}}'s Map{% endblock %}
+{% block scripts %}
+{% endblock %}
 
-{% block title %}Profile Map{% endblock %}
+{% block content %}
+<!-- Fullscreen map container -->
+<div class="map-container">
+  <div id="map" data-username="{{ username|e }}"></div>
+</div>
 
-{% block center %}
-	<h1>{{username}}'s Map</h1>
+<!-- Google Maps API -->
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places"></script>
+<script src="{{ url_for('static', filename='js/profile_map.js') }}" async defer></script>
 {% endblock %}
