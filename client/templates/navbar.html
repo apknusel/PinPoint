@@ -1,22 +1,36 @@
 <div class="nav-wrapper">
-    <div class="pure-menu pure-menu-horizontal nav-inner">
-        <ul class="pure-menu-list nav-list">
-            <li class="pure-menu-item"><a href="/" class="pure-menu-link">Home</a></li>
-            <li class="pure-menu-item"><a href="/profile" class="pure-menu-link">Profile</a></li>
-            <li class="pure-menu-item"><a href="/create/post" class="pure-menu-link">Create Post</a></li>
-            <li class="pure-menu-item login-item">
-                {% if session.get('user') %}
-                    <a href="/logout" class="pure-menu-link">Logout</a>
-                {% else %}
-                    <a href="/login" class="pure-menu-link">Login</a>
-                {% endif %}
-            </li>
-        </ul>
-    </div>  
-    {% include 'searchbar.html'%}
+    <div class="pure-g nav-grid">
+        <!-- Left section: Home, Profile, Create Post -->
+        <div class="pure-u-1-3 nav-left">
+            <a href="/" class="nav-icon" title="Home">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+            </a>
+            <a href="/profile" class="nav-icon" title="Profile">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </a>
+            <a href="/create/post" class="nav-link">create post</a>
+        </div>
+        
+        <!-- Center section: Search -->
+        <div class="pure-u-1-3 nav-center">
+            {% include 'searchbar.html'%}
+        </div>
+        
+        <!-- Right section: Login/Logout -->
+        <div class="pure-u-1-3 nav-right">
+            {% if session.get('userinfo') %}
+                <span class="nav-status">Logged in as {{ session.get('userinfo').get('nickname') }}</span>
+                <a href="/logout" class="nav-button">(Log out)</a>
+            {% else %}
+                <span class="nav-message">Want to make a post and comment? <a href="/login" class="nav-login-link">login</a>!</span>
+            {% endif %}
+        </div>
+    </div>
 </div>
-
-
-
-
 
