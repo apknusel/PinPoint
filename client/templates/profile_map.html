@@ -1,17 +1,15 @@
 {% extends 'full_page.html' %}
 {% block title %}{{username}}'s Map{% endblock %}
+{% block scripts %}
+{% endblock %}
 
 {% block content %}
 <!-- Fullscreen map container -->
 <div class="map-container">
-  <div id="map"></div>
+  <div id="map" data-username="{{ username|e }}"></div>
 </div>
 
 <!-- Google Maps API -->
 <script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places"></script>
-<script>
-    // Pass the username to the JavaScript
-    const profileUsername = "{{ username }}";
-</script>
-<script src="{{ url_for('static', filename='js/profile_map.js') }}"></script>
+<script src="{{ url_for('static', filename='js/profile_map.js') }}" async defer></script>
 {% endblock %}

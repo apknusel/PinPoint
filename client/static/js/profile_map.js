@@ -1,4 +1,5 @@
 let map;
+const profileUsername = document.getElementById('map').dataset.username;
 
 async function initMap() {
     const center = { lat: 44.9778, lng: -93.2650 };
