@@ -108,6 +108,10 @@ def get_posts():
     pool = current_app.config["DB_POOL"]
     return jsonify(db.fetch_posts(pool))
 
+@app.route("/api/posts/<username>")
+def get_posts_by_username(username):
+    pool = current_app.config["DB_POOL"]
+    return jsonify(db.fetch_posts_by_username(pool, username))
 
 @app.route("/api/<post_id>/comment", methods=["POST"])
 def add_comment(post_id):
