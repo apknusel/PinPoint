@@ -25,7 +25,6 @@ async function filterFunction() {
   
   search_results.innerHTML = "";
 
-  search_results.innerHTML = "";
   if (!user_data.length) {
     searchbar_wrapper.className = "searchbar-wrapper";
     const empty = document.createElement('div');
