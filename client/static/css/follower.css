@@ -143,11 +143,10 @@
 }
 
 .follower-entries button {
-    border-radius: 2rem;
     margin-left: 35px;
     height: 35px;
     background-color: var(--follower-view-btn);
-    border-color: var(--follower-view-btn);
+    border-style: none;
     font-size: 13px;
 }
 

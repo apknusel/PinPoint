@@ -19,8 +19,8 @@
   --follower-request-scroll-thumb: #888888;
   --follower-request-scroll-thumb-hover: #646464;
   --follower-request-scroll-thumb-active: #444444;
-  --follower-view-btn: white;
-  --follower-view-btn-hover: grey;
+  --follower-view-btn: #F4F1F0;
+  --follower-view-btn-hover: #ddd;
   
   /* Navbar and text colors */
   --text-color: #333;
