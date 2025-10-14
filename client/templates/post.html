@@ -45,3 +45,21 @@
   </div>
 </div>
 {% endblock %}
+
+{% block right %}
+<div class="recommended-wrapper">
+  <h3>Nearby posts</h3>
+  {% if recommended_posts %}
+  <div class="recommended-list">
+    {% for rp in recommended_posts %}
+    <a class="recommended-item" href="{{ url_for('post', post_id=rp.post_id) }}" title="{{ rp.caption }}">
+      <img class="recommended-thumb" src="data:image/jpeg;base64,{{ rp.image_data }}" alt="{{ rp.caption }}">
+      <div class="recommended-username">{{ rp.nickname }}</div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="no-recommended">No nearby posts</div>
+  {% endif %}
+</div>
+{% endblock %}
