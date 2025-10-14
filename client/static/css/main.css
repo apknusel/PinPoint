@@ -103,7 +103,7 @@
 }
 
 /* Map sizing to fit viewport without scrollbars */
-#map {
+.main-map {
   width: 100vw;
   height: calc(100vh - 51px); /* 50px navbar + 1px border */
 }

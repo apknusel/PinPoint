@@ -15,13 +15,48 @@
 
 .container {
     display: block;
-    margin: 5%;
+    margin: 16px 5%;
+}
+
+.container h2 {
+    margin-top: 0;
+}
+
+.caption-input {
+    width: 100%;
+    height: 48px;
+}
+
+.caption-input:focus {
+    outline: 3px solid var(--searchbar-color-selected);
+}
+
+.upload-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.file-name {
+    color: var(--text-color, #333);
+}
+
+.image-preview-wrapper {
+    margin-top: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: #fafafa;
+    height: 55vh;
+    width: 100%;
+    display: grid;
+    place-items: center;
 }
 
 .image-preview {
-    display: none;
-    max-width: 100%;
-    margin: .5rem 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #fafafa;
+    max-height: 55vh;
 }

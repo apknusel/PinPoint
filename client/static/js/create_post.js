@@ -40,22 +40,34 @@ window.initCreatePostMap = initCreatePostMap;
 document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('image');
     const preview = document.getElementById('imagePreview');
-    if (!fileInput || !preview) return;
+    const wrapper = preview ? preview.parentElement : null;
+    const placeholder = wrapper ? wrapper.querySelector('.image-preview-placeholder') : null;
+    const fileNameSpan = document.getElementById('fileName');
+    if (!fileInput || !preview || !wrapper || !placeholder || !fileNameSpan) return;
+
+    function resetPreview() {
+        preview.removeAttribute('src');
+        preview.hidden = true;
+        placeholder.hidden = false;
+        fileNameSpan.textContent = 'No file chosen';
+    }
+
+    resetPreview();
 
     fileInput.addEventListener('change', () => {
         const file = fileInput.files && fileInput.files[0];
         if (!file || !file.type.startsWith('image/')) {
-            preview.style.display = 'none';
-            preview.removeAttribute('src');
+            resetPreview();
             return;
         }
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            preview.src = e.target.result;
-            preview.style.display = 'block';
-        };
-        reader.readAsDataURL(file);
+        fileNameSpan.textContent = file.name;
+
+        // Use Object URL for efficient preview
+        const url = URL.createObjectURL(file);
+        preview.onload = () => URL.revokeObjectURL(url);
+        preview.src = url;
+
+        preview.hidden = false;
+        placeholder.hidden = true;
     });
 });
-
-window.onload = initCreatePostMap;
