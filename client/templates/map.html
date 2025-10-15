@@ -1,8 +1,14 @@
-<!-- Fullscreen map container -->
-<div class="map-container">
-  <div id="map" class="main-map"></div>
-</div>
-
-<!-- Google Maps API -->
-<script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places"></script>
+<!-- Mapbox GL JS -->
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.js"></script>
+<style>
+body { margin: 0; padding: 0; }
+#map { position: absolute; top: 50px; bottom: 0; width: 100%; }
+</style>
+<script>
+    window.MAPBOX_ACCESS_TOKEN = '{{ mapbox_access_token }}';
+</script>
 <script src="{{ url_for('static', filename='js/map.js') }}"></script>
+
+<div id="map"></div>
