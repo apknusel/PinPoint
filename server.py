@@ -16,6 +16,8 @@ def setup():
     app.secret_key = os.environ.get("APP_SECRET_KEY")
     current_app.config["GOOGLE_MAPS_API_KEY"] = os.environ.get(
         "GOOGLE_MAPS_API_KEY")
+    current_app.config["MAPBOX_ACCESS_TOKEN"] = os.environ.get(
+        "MAPBOX_ACCESS_TOKEN")
     current_app.config["DB_POOL"] = db.init_pool(
         os.environ.get("DATABASE_URL"))
     oauth = OAuth(app)
@@ -60,6 +62,10 @@ with app.app_context():
 @app.context_processor
 def inject_google_maps_key():
     return {"google_maps_api_key": current_app.config.get("GOOGLE_MAPS_API_KEY")}
+
+@app.context_processor
+def inject_mapbox_access_token():
+    return {"mapbox_access_token": current_app.config.get("MAPBOX_ACCESS_TOKEN")}
 
 
 @app.route("/login")
