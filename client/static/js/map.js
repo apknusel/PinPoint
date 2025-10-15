@@ -31,7 +31,7 @@ async function loadPosts() {
         if (posts.length > 0) {
             map.flyTo({
                 center: [posts[0].longitude, posts[0].latitude],
-                zoom: 4
+                zoom: 2
             });
         }
         
