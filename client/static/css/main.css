@@ -112,17 +112,3 @@
 .nav-login-link:hover {
   text-decoration: underline;
 }
-
-/* Map sizing to fit viewport without scrollbars */
-.main-map {
-  width: 100vw;
-  height: calc(100vh - 51px); /* 50px navbar + 1px border */
-}
-
-/* Prevent scrollbars */
-body, html {
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  height: 100vh;
-}
