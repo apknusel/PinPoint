@@ -48,7 +48,7 @@ def ensure_logged_in_user():
     user_id = userinfo.get("sub")
     nickname = userinfo.get("nickname") or None
     email = userinfo.get("email") or None
-    picture = userinfo.get("picture") or None
+    picture = userinfo.get("picture") or None    
     db.upsert_user(pool, user_id, nickname, email, picture)
     return user_id
 
@@ -98,9 +98,44 @@ def callback():
     except Exception:
         session["userinfo"] = None
     session["user"] = token
+    
+    pool = current_app.config["DB_POOL"]
+    nickname = userinfo.get("nickname")
+    profile_data = db.check_profile_complete(pool, nickname)
+
+    session.update(profile_data)
+
     ensure_logged_in_user()
     return redirect(url_for("index"))
 
+@app.route("/api/check-profile-status")
+def get_profile_status():
+    logged_in = session.get("user") is not None
+    profile_complete = session.get('profile_complete', False)
+    return jsonify({
+        'logged_in': logged_in,
+        'profile_complete': profile_complete
+    })
+
+@app.route("/complete_profile", methods=["GET", "POST"])
+def complete_profile():
+    userinfo = session.get("userinfo")
+    if session.get('profile_complete'):
+        return redirect(url_for("index"))
+    if request.method == 'POST':
+        pool = current_app.config["DB_POOL"]
+        nickname = userinfo.get("nickname")
+        display_name = request.form.get('display_name')
+        privacy_settings = (request.form.get('privacy_settings') == "public")
+        
+        db.complete_profile(pool, nickname, display_name, privacy_settings)
+        
+        session['profile_complete'] = True
+        session['display_name'] = display_name
+        session['public'] = privacy_settings
+        
+        return redirect(url_for("index"))
+    return render_template("complete_profile.html")
 
 @app.route("/api/posts")
 def get_posts():
@@ -186,6 +221,7 @@ def profile(username):
 
     profile_user = db.fetch_users(pool, username, True)
     followers_data = db.fetch_followers(pool, profile_user[0]['user_id'])
+    display_name = profile_user[0]['display_name']
     profile_picture = db.fetch_user_profile_image(pool, username)
     posts = db.fetch_users_post_images(pool, username)
 
@@ -207,6 +243,7 @@ def profile(username):
 
     return render_template("profile.html",
                             username=username, 
+                            display_name=display_name,
                             is_self=is_self,
                             current_user=current_user, 
                             followers_data=followers_data,

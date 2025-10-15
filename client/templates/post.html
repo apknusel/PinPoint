@@ -10,7 +10,7 @@
   <div class="post-header">
     <a href="{{ url_for('profile', username=post.nickname) }}">
       <img class="post-avatar" src="{{ post.picture }}" alt="{{ post.nickname }} profile">
-      <span class="post-username">{{ post.nickname }}</span>
+      <span class="post-username">{{ post.display_name }}</span>
     </a>
   </div>
   <div class="post-picture">
@@ -23,9 +23,9 @@
     {% if comments %}
     {% for c in comments %}
     <div class="comment">
-      <img class="comment-avatar" src="{{ c.picture or '' }}" alt="{{ c.nickname }}">
+      <img class="comment-avatar" src="{{ c.picture or '' }}" alt="{{ c.display_name }}">
       <div class="comment-body">
-        <strong>{{ c.nickname }}</strong>: {{ c.comment }}
+        <strong>{{ c.display_name }}</strong>: {{ c.comment }}
       </div>
     </div>
     {% endfor %}
@@ -54,7 +54,7 @@
     {% for rp in recommended_posts %}
     <a class="recommended-item" href="{{ url_for('post', post_id=rp.post_id) }}" title="{{ rp.caption }}">
       <img class="recommended-thumb" src="data:image/jpeg;base64,{{ rp.image_data }}" alt="{{ rp.caption }}">
-      <div class="recommended-username">{{ rp.nickname }}</div>
+      <div class="recommended-username">{{ rp.display_name }}</div>
     </a>
     {% endfor %}
   </div>

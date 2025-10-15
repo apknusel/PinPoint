@@ -5,7 +5,9 @@ CREATE TABLE Users (
   user_id TEXT PRIMARY KEY,
   nickname TEXT NOT NULL,
   email TEXT NOT NULL,
-  picture TEXT NOT NULL
+  picture TEXT NOT NULL,
+  display_name TEXT,
+  public BOOLEAN
 );
 
 CREATE TABLE Posts (
