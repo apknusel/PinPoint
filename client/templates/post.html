@@ -5,27 +5,49 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/post.css') }}">
 {% endblock %}
 
+{% block scripts %} 
+<script src="{{ url_for('static', filename='js/post_map.js') }}"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initPostMap&loading=async&v=weekly" async defer></script>
+{% endblock %}
+
 {% block center %}
 <div class="post-div">
   <div class="post-header">
-    <a href="{{ url_for('profile', username=post.nickname) }}">
+    <a href="{{ url_for('profile', username=post.nickname) }}" class="user-link">
       <img class="post-avatar" src="{{ post.picture }}" alt="{{ post.nickname }} profile">
-      <span class="post-username">{{ post.nickname }}</span>
+      <div class="post-user">
+        <span class="post-username">{{ post.nickname }}</span>
+        <span class="post-subtitle">View profile</span>
+      </div>
     </a>
   </div>
-  <div class="post-picture">
+
+  <figure class="post-picture">
     <img src="data:image/jpeg;base64,{{ post.image_data }}" alt="Post image">
-  </div>
+    <!-- Map overlay -->
+    <div class="post-map-overlay">
+      <div id="postMap" class="post-map" data-lat="{{ post.latitude }}" data-lng="{{ post.longitude }}"></div>
+    </div>
+  </figure>
+
   <div class="post-caption">
-    <p><strong>Caption:</strong> {{ post.caption }}</p>
+    <p>{{ post.caption }}</p>
   </div>
+
+  <div class="section-divider"></div>
+
   <div class="post-comments">
+    <h3 class="section-title">
+      Comments{% if comments %} ({{ comments|length }}){% endif %}
+    </h3>
+
     {% if comments %}
     {% for c in comments %}
     <div class="comment">
       <img class="comment-avatar" src="{{ c.picture or '' }}" alt="{{ c.nickname }}">
       <div class="comment-body">
-        <strong>{{ c.nickname }}</strong>: {{ c.comment }}
+        <strong class="comment-name">{{ c.nickname }}</strong>
+        <span class="comment-text">{{ c.comment }}</span>
       </div>
     </div>
     {% endfor %}
@@ -33,14 +55,13 @@
     <div class="no-comments">No comments</div>
     {% endif %}
 
-    <!-- Add comments -->
     {% if session.get('userinfo') %}
     <form class="comment-form" method="post" action="/api/{{ post.post_id }}/comment">
-      <input type="text" name="comment" id="comment" required placeholder="Add a comment..."></input>
+      <input class="comment-input" type="text" name="comment" id="comment" required placeholder="Add a comment..." />
       <button type="submit" class="pure-button pure-button-primary">Comment</button>
     </form>
     {% else %}
-    <p><a href="/login">Log in</a> to comment.</p>
+    <p class="comment-login"><a href="/login">Log in</a> to comment.</p>
     {% endif %}
   </div>
 </div>
@@ -48,13 +69,16 @@
 
 {% block right %}
 <div class="recommended-wrapper">
-  <h3>Nearby posts</h3>
+  <h3 class="section-title">Nearby Posts</h3>
   {% if recommended_posts %}
   <div class="recommended-list">
     {% for rp in recommended_posts %}
     <a class="recommended-item" href="{{ url_for('post', post_id=rp.post_id) }}" title="{{ rp.caption }}">
       <img class="recommended-thumb" src="data:image/jpeg;base64,{{ rp.image_data }}" alt="{{ rp.caption }}">
-      <div class="recommended-username">{{ rp.nickname }}</div>
+      <div class="recommended-info">
+        <div class="recommended-username">{{ rp.nickname }}</div>
+        <div class="recommended-caption">{{ rp.caption }}</div>
+      </div>
     </a>
     {% endfor %}
   </div>
