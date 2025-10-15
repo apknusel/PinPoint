@@ -28,6 +28,10 @@
   --link-color: #0066cc;
   --border-color: #ccc;
   --background-white: white;
+
+  /* Post colors */
+  --post-subtitle: #666;
+  --comment-color: #333;
 }
 
 /* Navbar Grid Layout */
