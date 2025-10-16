@@ -8,6 +8,7 @@
 
 {% block scripts %} 
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
 <script>
     window.MAPBOX_ACCESS_TOKEN = '{{ mapbox_access_token }}';
 </script>
@@ -31,7 +32,9 @@
     <!-- Map overlay -->
     <div class="post-map-overlay" id="mapOverlay">
       <div id="postMap" class="post-map" data-lat="{{ post.latitude }}" data-lng="{{ post.longitude }}"></div>
-      <button id="mapToggle" class="map-toggle-btn" aria-label="Expand map">+</button>
+      <button id="mapToggle" class="map-toggle-btn" aria-label="Expand map">
+        <i data-lucide="maximize"></i>
+      </button>
     </div>
   </figure>
 

@@ -21,13 +21,18 @@ function initPostMap() {
     .setLngLat([lng, lat])
     .addTo(map);
 
-  // Watch for resize events on the overlay and update the map continuously
-  let resizeTimeout;
+  // Smooth resize using ResizeObserver with requestAnimationFrame throttling
+  let resizeScheduled = false;
   const resizeObserver = new ResizeObserver(() => {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(() => {
-      map.resize();
-    }, 10);
+    if (!resizeScheduled) {
+      resizeScheduled = true;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          map.resize();
+          resizeScheduled = false;
+        });
+      });
+    }
   });
   resizeObserver.observe(overlay);
 
@@ -39,19 +44,25 @@ function initPostMap() {
       // Collapse to 15%
       overlay.style.width = '15%';
       overlay.style.height = '15%';
-      toggleBtn.textContent = '+';
+      toggleBtn.innerHTML = '<i data-lucide="maximize"></i>';
       toggleBtn.setAttribute('aria-label', 'Expand map');
     } else {
       // Expand to 50%
       overlay.style.width = '50%';
       overlay.style.height = '50%';
-      toggleBtn.textContent = '−';
+      toggleBtn.innerHTML = '<i data-lucide="minimize"></i>';
       toggleBtn.setAttribute('aria-label', 'Collapse map');
     }
     
     isExpanded = !isExpanded;
+    
+    // Re-initialize Lucide icons after changing innerHTML
+    lucide.createIcons();
   });
 }
 
-// Initialize the map when the page loads
-window.addEventListener('load', initPostMap);
+// Initialize the map and Lucide icons when the page loads
+window.addEventListener('load', () => {
+  initPostMap();
+  lucide.createIcons();
+});

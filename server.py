@@ -7,7 +7,7 @@ from authlib.integrations.flask_client import OAuth
 from urllib.parse import quote_plus, urlencode
 from dotenv import load_dotenv
 from functools import wraps
-from PIL import Image, ImageOps
+# from PIL import Image, ImageOps
 
 load_dotenv()
 
