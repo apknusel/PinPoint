@@ -12,6 +12,8 @@
   z-index: 1001;
   background-color: var(--background-white);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  overflow-y: auto; 
+  max-height: 336px;
 }
 
 .search-input {

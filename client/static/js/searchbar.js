@@ -22,7 +22,7 @@ async function filterFunction() {
     console.log(err);
     return;
   }
-  
+
   search_results.innerHTML = "";
 
   if (!user_data.length) {
@@ -34,15 +34,15 @@ async function filterFunction() {
     return;
   }
 
-  for (const { user_id, nickname, picture } of user_data) {
-    user = createElement(nickname, picture);
+  for (const { user_id, nickname, display_name, picture } of user_data) {
+    user = createElement(nickname, display_name, picture);
     search_results.append(user);
   }
 }
 
-function createElement(name, picture) {
+function createElement(nickname, display_name, picture) {
   const link = document.createElement('a');
-  link.href = url.replace('__name__', encodeURIComponent(name));
+  link.href = url.replace('__name__', encodeURIComponent(nickname));
   link.className = "dropdown-entries";
 
   const img = document.createElement('img');
@@ -50,7 +50,7 @@ function createElement(name, picture) {
   img.className = "user-avatar";
 
   const text = document.createElement('span');
-  text.innerText = name;
+  text.innerText = display_name;
 
   link.appendChild(img);
   link.appendChild(text);
