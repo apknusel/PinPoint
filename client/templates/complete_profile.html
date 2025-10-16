@@ -1,0 +1,37 @@
+{% extends '3-5.html' %}
+
+{% block title %}Complete Your Profile{% endblock %}
+
+{% block center %}
+<div class="pure-u-1">
+    <h1>Complete Your Profile</h1>
+    <p>Please provide a display name and choose your privacy settings to continue.</p>
+    
+    <form class="pure-form pure-form-stacked" method="POST" action="{{ url_for('complete_profile') }}">
+        <fieldset>
+            <legend>Profile Information</legend>
+            
+            <label for="display_name">Display Name</label>
+            <input type="text" 
+                   id="display_name" 
+                   name="display_name" 
+                   placeholder="Enter your display name" 
+                   required 
+                   class="pure-input-1"
+                   maxlength="50">
+            <span class="pure-form-message">This is how other users will see you.</span>
+            
+            <label for="privacy_settings">Privacy Settings</label>
+            <select id="privacy_settings" name="privacy_settings" required class="pure-input-1">
+                <option value="">-- Select Privacy Level --</option>
+                <option value="public">Public - Anyone can see your profile</option>
+                <option value="private">Private - Only you can see your profile</option>
+            </select>
+            
+            <button type="submit" class="pure-button pure-button-primary" style="margin-top: 1rem;">
+                Complete Profile
+            </button>
+        </fieldset>
+    </form>
+</div>
+{% endblock %}
