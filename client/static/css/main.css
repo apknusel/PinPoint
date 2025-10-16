@@ -28,6 +28,10 @@
   --link-color: #0066cc;
   --border-color: #ccc;
   --background-white: white;
+
+  /* Post colors */
+  --post-subtitle: #666;
+  --comment-color: #333;
 }
 
 /* Navbar Grid Layout */
@@ -111,18 +115,4 @@
 .nav-button:hover,
 .nav-login-link:hover {
   text-decoration: underline;
-}
-
-/* Map sizing to fit viewport without scrollbars */
-#map {
-  width: 100vw;
-  height: calc(100vh - 51px); /* 50px navbar + 1px border */
-}
-
-/* Prevent scrollbars */
-body, html {
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  height: 100vh;
 }

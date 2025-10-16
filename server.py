@@ -1,21 +1,32 @@
 import os
+import db
+import uuid
 from flask import Flask, render_template, redirect, url_for, current_app, session, request, jsonify
 from authlib.integrations.flask_client import OAuth
 from urllib.parse import quote_plus, urlencode
 from dotenv import load_dotenv
-import uuid
-import db
+from functools import wraps
 
 load_dotenv()
 
 oauth = None
 
 
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get("userinfo"):
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return decorated
+
 def setup():
     global oauth
     app.secret_key = os.environ.get("APP_SECRET_KEY")
     current_app.config["GOOGLE_MAPS_API_KEY"] = os.environ.get(
         "GOOGLE_MAPS_API_KEY")
+    current_app.config["MAPBOX_ACCESS_TOKEN"] = os.environ.get(
+        "MAPBOX_ACCESS_TOKEN")
     current_app.config["DB_POOL"] = db.init_pool(
         os.environ.get("DATABASE_URL"))
     oauth = OAuth(app)
@@ -48,7 +59,7 @@ def ensure_logged_in_user():
     user_id = userinfo.get("sub")
     nickname = userinfo.get("nickname") or None
     email = userinfo.get("email") or None
-    picture = userinfo.get("picture") or None
+    picture = userinfo.get("picture") or None    
     db.upsert_user(pool, user_id, nickname, email, picture)
     return user_id
 
@@ -60,6 +71,10 @@ with app.app_context():
 @app.context_processor
 def inject_google_maps_key():
     return {"google_maps_api_key": current_app.config.get("GOOGLE_MAPS_API_KEY")}
+
+@app.context_processor
+def inject_mapbox_access_token():
+    return {"mapbox_access_token": current_app.config.get("MAPBOX_ACCESS_TOKEN")}
 
 
 @app.route("/login")
@@ -98,9 +113,44 @@ def callback():
     except Exception:
         session["userinfo"] = None
     session["user"] = token
+    
+    pool = current_app.config["DB_POOL"]
+    nickname = userinfo.get("nickname")
+    profile_data = db.check_profile_complete(pool, nickname)
+
+    session.update(profile_data)
+
     ensure_logged_in_user()
     return redirect(url_for("index"))
 
+@app.route("/api/check-profile-status")
+def get_profile_status():
+    logged_in = session.get("user") is not None
+    profile_complete = session.get('profile_complete', False)
+    return jsonify({
+        'logged_in': logged_in,
+        'profile_complete': profile_complete
+    })
+
+@app.route("/complete_profile", methods=["GET", "POST"])
+def complete_profile():
+    userinfo = session.get("userinfo")
+    if session.get('profile_complete'):
+        return redirect(url_for("index"))
+    if request.method == 'POST':
+        pool = current_app.config["DB_POOL"]
+        nickname = userinfo.get("nickname")
+        display_name = request.form.get('display_name')
+        privacy_settings = (request.form.get('privacy_settings') == "public")
+        
+        db.complete_profile(pool, nickname, display_name, privacy_settings)
+        
+        session['profile_complete'] = True
+        session['display_name'] = display_name
+        session['public'] = privacy_settings
+        
+        return redirect(url_for("index"))
+    return render_template("complete_profile.html")
 
 @app.route("/api/posts")
 def get_posts():
@@ -113,9 +163,8 @@ def get_posts_by_username(username):
     return jsonify(db.fetch_posts_by_username(pool, username))
 
 @app.route("/api/<post_id>/comment", methods=["POST"])
+@requires_auth
 def add_comment(post_id):
-    if not session.get("userinfo"):
-        return redirect(url_for("login"))
     user_id = ensure_logged_in_user()
     comment = request.form.get("comment", "").strip()
     # comment is empty
@@ -142,9 +191,8 @@ def post(post_id):
 
 
 @app.route("/create/post", methods=["GET", "POST"])
+@requires_auth
 def create_post():
-    if not session.get("userinfo"):
-        return redirect(url_for("login"))
     if request.method == "GET":
         return render_template("create_post.html", google_maps_api_key=os.environ.get("GOOGLE_MAPS_API_KEY"))
     user_id = ensure_logged_in_user()
@@ -172,9 +220,8 @@ def create_post():
 
 
 @app.route("/profile")
+@requires_auth
 def profile_root():
-    if not session.get("userinfo"):
-        return redirect(url_for("login"))
     userinfo = session["userinfo"]
     return redirect(url_for("profile", username=userinfo.get("nickname")))
 
@@ -186,6 +233,7 @@ def profile(username):
 
     profile_user = db.fetch_users(pool, username, True)
     followers_data = db.fetch_followers(pool, profile_user[0]['user_id'])
+    display_name = profile_user[0]['display_name']
     profile_picture = db.fetch_user_profile_image(pool, username)
     posts = db.fetch_users_post_images(pool, username)
 
@@ -207,6 +255,7 @@ def profile(username):
 
     return render_template("profile.html",
                             username=username, 
+                            display_name=display_name,
                             is_self=is_self,
                             current_user=current_user, 
                             followers_data=followers_data,

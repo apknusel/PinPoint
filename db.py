@@ -23,6 +23,44 @@ def upsert_user(pool, user_id, nickname, email, picture):
     finally:
         pool.putconn(conn)
 
+def complete_profile(pool, nickname, display_name, privacy_settings):
+    conn = pool.getconn()
+    try:
+        with conn.cursor(cursor_factory=DictCursor) as cur:
+            cur.execute(
+                """
+                UPDATE Users
+                SET display_name = %s, public = %s
+                WHERE nickname = %s
+                """,
+                (display_name, privacy_settings, nickname),
+            )
+        conn.commit()
+    finally:
+        pool.putconn(conn)
+
+def check_profile_complete(pool, nickname):
+    conn = pool.getconn()
+    try:
+        with conn.cursor(cursor_factory=DictCursor) as cur:
+            cur.execute(
+                "SELECT display_name, public FROM Users WHERE nickname = %s",
+                (nickname,)
+            )
+            result = cur.fetchone()
+            if result and result['display_name']:
+                return {
+                    'profile_complete': True,
+                    'display_name': result['display_name'],
+                    'public': result['public']
+                }
+            else:
+                return {
+                    'profile_complete': False
+                }
+    finally:
+        pool.putconn(conn)
+
 def fetch_posts(pool):
     conn = pool.getconn()
     try:
@@ -122,6 +160,7 @@ def fetch_single_post(pool, post_id):
                        p.caption,
                        p.user_id,
                        u.nickname,
+                       u.display_name,
                        u.picture,
                        ST_X(p.location) AS longitude,
                        ST_Y(p.location) AS latitude,
@@ -142,6 +181,7 @@ def fetch_single_post(pool, post_id):
                 "caption": row["caption"],
                 "user_id": row["user_id"],
                 "nickname": row["nickname"],
+                "display_name": row["display_name"],
                 "picture": row["picture"],
                 "latitude": row["latitude"],
                 "longitude": row["longitude"],
@@ -222,7 +262,7 @@ def fetch_comments(pool, post_id):
                 SELECT c.comment_id,
                        c.comment,
                        c.created_at,
-                       u.nickname,
+                       u.display_name,
                        u.picture,
                        c.user_id
                 FROM Comments c
@@ -237,7 +277,7 @@ def fetch_comments(pool, post_id):
                 {
                     "comment_id": r["comment_id"],
                     "comment": r["comment"],
-                    "nickname": r["nickname"],
+                    "display_name": r["display_name"],
                     "picture": r["picture"],
                     "user_id": r["user_id"],
                 }
@@ -253,7 +293,7 @@ def fetch_users(pool, name, exact_match=False):
             if (exact_match):
                 cur.execute(
                     """
-                SELECT user_id, nickname, picture 
+                SELECT user_id, nickname, display_name, picture 
                 FROM users WHERE LOWER(nickname) = LOWER(%s)
                 """,
                     (name,)
@@ -281,7 +321,7 @@ def fetch_nearest_posts(pool, post_id, k=5):
                 SELECT 
                     p2.post_id,
                     p2.caption,
-                    u.nickname,
+                    u.display_name,
                     m.file_data
                 FROM Posts p1
                 JOIN Posts p2 ON p2.post_id <> p1.post_id
@@ -300,7 +340,7 @@ def fetch_nearest_posts(pool, post_id, k=5):
                 {
                     "post_id": r["post_id"],
                     "caption": r["caption"],
-                    "nickname": r["nickname"],
+                    "display_name": r["display_name"],
                     "image_data": base64.b64encode(r["file_data"]).decode("utf-8") if r["file_data"] else None,
                 }
                 for r in rows
