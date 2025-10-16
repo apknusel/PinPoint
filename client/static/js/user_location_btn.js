@@ -8,7 +8,6 @@ function getLocation() {
 
 function success(position) {
     const newLocation = [position.coords.longitude, position.coords.latitude];
-
     const popup = new mapboxgl.Popup({ closeButton: false, closeOnClick: false })
         .setLngLat(newLocation)
         .setHTML(
@@ -28,5 +27,5 @@ function success(position) {
 }
 
 function error(e) {
-    console.error("Location not found");
+    console.error("Error code: "+e.code);
 }
