@@ -7,7 +7,7 @@ async function initProfileMap() {
         return;
     }
 
-    const profileUsername = profileMapElement.dataset.username;
+    const profileUserId = profileMapElement.dataset.userId;
     const mapboxToken = profileMapElement.dataset.mapboxToken;
 
     // Default center (Minneapolis)
@@ -25,13 +25,12 @@ async function initProfileMap() {
     });
 
     // Fetch and display posts for the specific user
-    await loadPosts(profileUsername);
+    await loadPosts(profileUserId);
 }
 
-async function loadPosts(profileUsername) {
+async function loadPosts(profileUserId) {
     try {
-        // Fetch posts for the specific user using the profileUsername parameter
-        const response = await fetch(`/api/posts/${profileUsername}`);
+        const response = await fetch(`/api/posts/by-user/${encodeURIComponent(profileUserId)}`);
         if (!response.ok) {
             console.error('Failed to fetch posts');
             return;
@@ -39,12 +38,9 @@ async function loadPosts(profileUsername) {
 
         const posts = await response.json();
         
-        // If there are posts, fit the map to show all markers
         if (posts.length > 0) {
-            // Create a bounds object
             const bounds = new mapboxgl.LngLatBounds();
             
-            // Create markers for each post and extend bounds
             posts.forEach(post => {
                 const marker = new mapboxgl.Marker()
                     .setLngLat([post.longitude, post.latitude])
@@ -60,11 +56,9 @@ async function loadPosts(profileUsername) {
                     )
                     .addTo(map);
                 
-                // Extend bounds to include this marker
                 bounds.extend([post.longitude, post.latitude]);
             });
             
-            // Fit map to bounds with padding
             map.fitBounds(bounds, {
                 padding: 50,
                 maxZoom: 12
@@ -75,13 +69,11 @@ async function loadPosts(profileUsername) {
     }
 }
 
-// Helper function to escape HTML and prevent XSS
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
 }
 
-// Initialize the map when the page loads
 window.addEventListener('load', initProfileMap);
 

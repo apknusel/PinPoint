@@ -18,7 +18,7 @@
 {% block center %}
 <div class="post-div">
   <div class="post-header">
-    <a href="{{ url_for('profile', username=post.nickname) }}" class="user-link">
+    <a href="{{ url_for('profile', user_id=post.user_id) }}" class="user-link">
       <img class="post-avatar" src="{{ post.picture }}" alt="{{ post.nickname }} profile">
       <div class="post-user">
         <span class="post-username">{{ post.display_name }}</span>

@@ -1,5 +1,5 @@
 // TODO: replace with /profile/<name>/posts
-const url = "/profile/__name__";
+const url = "/profile/__id__";
 const search_input = document.getElementById('searchInput');
 const search_results = document.getElementById('searchbarDropdown');
 const searchbar_wrapper = document.getElementById('searchbarWrapper');
@@ -35,14 +35,14 @@ async function filterFunction() {
   }
 
   for (const { user_id, nickname, picture } of user_data) {
-    user = createElement(nickname, picture);
+    const user = createElement(user_id, nickname, picture);
     search_results.append(user);
   }
 }
 
-function createElement(name, picture) {
+function createElement(userId, name, picture) {
   const link = document.createElement('a');
-  link.href = url.replace('__name__', encodeURIComponent(name));
+  link.href = url.replace('__id__', encodeURIComponent(userId));
   link.className = "dropdown-entries";
 
   const img = document.createElement('img');

@@ -6,14 +6,12 @@ const add_follower = document.getElementById('addFollower');
 
 
 async function requestFollowing() {
-    followee_name = pathParts[2];
+    const followee_id = pathParts[2];
     try {
-        const response = await fetch(`/follower_request_create?followee=${followee_name}`, { method: "POST" });
+        const response = await fetch(`/follower_request_create?followee=${encodeURIComponent(followee_id)}`, { method: "POST" });
         const data = await response.json();
-
         if (!response.ok)
             throw new Error(data.error || "Server Error");
-
     } catch (e) {
         console.log(e.message);
     }
@@ -21,21 +19,18 @@ async function requestFollowing() {
 }
 
 async function requestHandler(event, action) {
-    followee_name = pathParts[2];
-    const li = event.currentTarget.closest('li');
-    follower_name = event.target.value;
+    const followee_id = pathParts[2];
+    const follower_id = event.target.value;
     try {
         const response = await fetch("/follower_request_handler", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ follower: follower_name, followee: followee_name, action: action })
+            body: JSON.stringify({ follower: follower_id, followee: followee_id, action: action })
         });
-
         const data = await response.json();
         if (!response.ok)
             throw new Error(data.error || "Server Error");
         (event.target.closest('li') || event.target.closest('div'))?.remove();
-
     } catch (e) {
         console.log(e.message);
     }
