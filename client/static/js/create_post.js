@@ -6,6 +6,7 @@ function initCreatePostMap() {
         zoom: 11,
         style: 'mapbox://styles/mapbox/standard'
     });
+    map.addControl(new ResetControl({ lat: 44.9778, lng: -93.2650 }, 11));
 
     const latInput = document.getElementById('latitude');
     const lngInput = document.getElementById('longitude');
