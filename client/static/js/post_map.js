@@ -4,19 +4,21 @@ function initPostMap() {
   const lat = parseFloat(div.dataset.lat);
   const lng = parseFloat(div.dataset.lng);
 
-  const center = { lat, lng };
-
-  const map = new google.maps.Map(div, {
-    center: center,
+  mapboxgl.accessToken = window.MAPBOX_ACCESS_TOKEN;
+  
+  const map = new mapboxgl.Map({
+    container: div,
+    style: 'mapbox://styles/mapbox/standard',
+    center: [lng, lat],
     zoom: 11,
-    streetViewControl: false,
-    mapTypeControl: false,
-    disableDefaultUI: true,
-    zoomControl: false,
-    fullscreenControl: false,
+    interactive: true,
+    attributionControl: false
   });
 
-  new google.maps.Marker({ position: center, map });
+  new mapboxgl.Marker()
+    .setLngLat([lng, lat])
+    .addTo(map);
 }
 
-window.initPostMap = initPostMap;
+// Initialize the map when the page loads
+window.addEventListener('load', initPostMap);
