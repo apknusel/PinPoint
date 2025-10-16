@@ -10,6 +10,7 @@ psycopg2 = "*"
 authlib = "*"
 requests = "*"
 python-dotenv = "*"
+pillow = "*"
 
 [dev-packages]
 
