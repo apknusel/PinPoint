@@ -13,10 +13,10 @@
     {% block scripts %}{% endblock %}
     {% block head %}{% endblock %}
 </head>
-
 <body>
     {% block navbar %}
     {% include 'navbar.html' %}
+    {% include './components/user_location_btn.html' %}
     {% endblock %}
     <div id="layout" class="pure-g">
         {% block content %}{% endblock %}
