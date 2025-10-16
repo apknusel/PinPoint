@@ -7,14 +7,7 @@ async function initMap() {
         container: 'map',
         style: 'mapbox://styles/mapbox/standard',
         center: [center.lng, center.lat],
-        zoom: 2
-    });
-    map.flyTo({
-        center: center,
-        zoom: 11,
-        speed: 1.5,
-        curve: 1.4,
-        essential: true,
+        zoom: 11
     });
     map.addControl(new mapboxgl.NavigationControl());
     map.addControl(
@@ -40,6 +33,14 @@ async function loadPosts() {
 
         const posts = await response.json();
 
+
+        // If there are posts, center the map on the first one
+        if (posts.length > 0) {
+            map.flyTo({
+                center: [posts[0].longitude, posts[0].latitude],
+                zoom: 2
+            });
+        }
         // Create markers for each post
         posts.forEach(post => {
             const marker = new mapboxgl.Marker()
