@@ -45,3 +45,50 @@
 .post-link:hover {
   cursor: pointer;
 }
+
+.profile-map-container {
+  display: none;
+}
+
+/* Map popup styles */
+.map-popup-content {
+  max-width: 200px;
+}
+
+.map-popup-title {
+  margin: 0 0 8px 0;
+}
+
+.map-popup-caption {
+  margin: 0;
+}
+
+.map-popup-link {
+  display: inline-block;
+  margin-top: 8px;
+}
+
+/* Show map and adjust layout on larger screens */
+@media screen and (min-width: 64em) {
+  .profile-map-container {
+    display: block;
+    position: fixed;
+    left: 0;
+    top: 50px;
+    width: 40%;
+    height: calc(100vh - 50px);
+    z-index: 1;
+  }
+  
+  #layout > .pure-u-lg-1-5:first-child {
+    width: 40%;
+  }
+  
+  #layout > .pure-u-lg-3-5 {
+    width: 40%;
+  }
+  
+  #layout > .pure-u-lg-1-5:last-child {
+    width: 20%;
+  }
+}

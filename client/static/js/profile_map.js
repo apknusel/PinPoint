@@ -1,23 +1,36 @@
 let map;
-const profileUsername = document.getElementById('map').dataset.username;
 
-async function initMap() {
-    const center = { lat: 44.9778, lng: -93.2650 };
+async function initProfileMap() {
+    const profileMapElement = document.getElementById('profileMap');
+    
+    if (!profileMapElement) {
+        return;
+    }
 
-    map = new google.maps.Map(document.getElementById('map'), {
-        center: center,
+    const profileUsername = profileMapElement.dataset.username;
+    const mapboxToken = profileMapElement.dataset.mapboxToken;
+
+    // Default center (Minneapolis)
+    const defaultCenter = [-93.2650, 44.9778];
+    
+    mapboxgl.accessToken = mapboxToken;
+    
+    map = new mapboxgl.Map({
+        container: 'profileMap',
+        style: 'mapbox://styles/mapbox/standard',
+        center: defaultCenter,
         zoom: 11,
-        streetViewControl: false,
-        mapTypeControl: false
+        interactive: true,
+        attributionControl: false
     });
 
     // Fetch and display posts for the specific user
-    await loadPosts();
+    await loadPosts(profileUsername);
 }
 
-async function loadPosts() {
+async function loadPosts(profileUsername) {
     try {
-        // Fetch posts for the specific user using the profileUsername variable
+        // Fetch posts for the specific user using the profileUsername parameter
         const response = await fetch(`/api/posts/${profileUsername}`);
         if (!response.ok) {
             console.error('Failed to fetch posts');
@@ -26,41 +39,37 @@ async function loadPosts() {
 
         const posts = await response.json();
         
-        // If there are posts, center the map on the first one
+        // If there are posts, fit the map to show all markers
         if (posts.length > 0) {
-            map.setCenter({ 
-                lat: posts[0].latitude, 
-                lng: posts[0].longitude 
-            });
-            map.setZoom(4); // Adjust zoom to show multiple markers
-        }
-        
-        // Create markers for each post
-        posts.forEach(post => {
-            const marker = new google.maps.Marker({
-                position: { 
-                    lat: post.latitude, 
-                    lng: post.longitude 
-                },
-                map: map,
-                title: post.caption
-            });
-
-            // Add info window for each marker
-            const infoWindow = new google.maps.InfoWindow({
-                content: `
-                    <div style="max-width: 200px;">
-                        <h3 style="margin: 0 0 8px 0;">${escapeHtml(post.nickname)}</h3>
-                        <p style="margin: 0;">${escapeHtml(post.caption)}</p>
-                        <a href="/post/${post.post_id}" style="display: inline-block; margin-top: 8px;">View Post</a>
-                    </div>
-                `
+            // Create a bounds object
+            const bounds = new mapboxgl.LngLatBounds();
+            
+            // Create markers for each post and extend bounds
+            posts.forEach(post => {
+                const marker = new mapboxgl.Marker()
+                    .setLngLat([post.longitude, post.latitude])
+                    .setPopup(
+                        new mapboxgl.Popup({ offset: 25 })
+                            .setHTML(`
+                                <div class="map-popup-content">
+                                    <h3 class="map-popup-title">${escapeHtml(post.display_name)}</h3>
+                                    <p class="map-popup-caption">${escapeHtml(post.caption)}</p>
+                                    <a href="/post/${post.post_id}" class="map-popup-link">View Post</a>
+                                </div>
+                            `)
+                    )
+                    .addTo(map);
+                
+                // Extend bounds to include this marker
+                bounds.extend([post.longitude, post.latitude]);
             });
             
-            marker.addListener('click', () => {
-                infoWindow.open(map, marker);
+            // Fit map to bounds with padding
+            map.fitBounds(bounds, {
+                padding: 50,
+                maxZoom: 12
             });
-        });
+        }
     } catch (error) {
         console.error('Error loading posts:', error);
     }
@@ -74,5 +83,5 @@ function escapeHtml(text) {
 }
 
 // Initialize the map when the page loads
-window.onload = initMap;
+window.addEventListener('load', initProfileMap);
 
