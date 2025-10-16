@@ -1,21 +1,32 @@
 import os
+import db
+import uuid
 from flask import Flask, render_template, redirect, url_for, current_app, session, request, jsonify
 from authlib.integrations.flask_client import OAuth
 from urllib.parse import quote_plus, urlencode
 from dotenv import load_dotenv
-import uuid
-import db
+from functools import wraps
 
 load_dotenv()
 
 oauth = None
 
 
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get("userinfo"):
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return decorated
+
 def setup():
     global oauth
     app.secret_key = os.environ.get("APP_SECRET_KEY")
     current_app.config["GOOGLE_MAPS_API_KEY"] = os.environ.get(
         "GOOGLE_MAPS_API_KEY")
+    current_app.config["MAPBOX_ACCESS_TOKEN"] = os.environ.get(
+        "MAPBOX_ACCESS_TOKEN")
     current_app.config["DB_POOL"] = db.init_pool(
         os.environ.get("DATABASE_URL"))
     oauth = OAuth(app)
@@ -60,6 +71,10 @@ with app.app_context():
 @app.context_processor
 def inject_google_maps_key():
     return {"google_maps_api_key": current_app.config.get("GOOGLE_MAPS_API_KEY")}
+
+@app.context_processor
+def inject_mapbox_access_token():
+    return {"mapbox_access_token": current_app.config.get("MAPBOX_ACCESS_TOKEN")}
 
 
 @app.route("/login")
@@ -148,9 +163,8 @@ def get_posts_by_username(username):
     return jsonify(db.fetch_posts_by_username(pool, username))
 
 @app.route("/api/<post_id>/comment", methods=["POST"])
+@requires_auth
 def add_comment(post_id):
-    if not session.get("userinfo"):
-        return redirect(url_for("login"))
     user_id = ensure_logged_in_user()
     comment = request.form.get("comment", "").strip()
     # comment is empty
@@ -177,9 +191,8 @@ def post(post_id):
 
 
 @app.route("/create/post", methods=["GET", "POST"])
+@requires_auth
 def create_post():
-    if not session.get("userinfo"):
-        return redirect(url_for("login"))
     if request.method == "GET":
         return render_template("create_post.html", google_maps_api_key=os.environ.get("GOOGLE_MAPS_API_KEY"))
     user_id = ensure_logged_in_user()
@@ -207,9 +220,8 @@ def create_post():
 
 
 @app.route("/profile")
+@requires_auth
 def profile_root():
-    if not session.get("userinfo"):
-        return redirect(url_for("login"))
     userinfo = session["userinfo"]
     return redirect(url_for("profile", username=userinfo.get("nickname")))
 
