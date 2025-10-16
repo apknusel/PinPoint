@@ -3,11 +3,15 @@
 {% block title %}Post{% endblock %}
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/post.css') }}">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.css" rel="stylesheet">
 {% endblock %}
 
 {% block scripts %} 
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.js"></script>
+<script>
+    window.MAPBOX_ACCESS_TOKEN = '{{ mapbox_access_token }}';
+</script>
 <script src="{{ url_for('static', filename='js/post_map.js') }}"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initPostMap&loading=async&v=weekly" async defer></script>
 {% endblock %}
 
 {% block center %}
