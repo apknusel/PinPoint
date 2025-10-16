@@ -29,8 +29,9 @@
   <figure class="post-picture">
     <img src="data:image/jpeg;base64,{{ post.image_data }}" alt="Post image">
     <!-- Map overlay -->
-    <div class="post-map-overlay">
+    <div class="post-map-overlay" id="mapOverlay">
       <div id="postMap" class="post-map" data-lat="{{ post.latitude }}" data-lng="{{ post.longitude }}"></div>
+      <button id="mapToggle" class="map-toggle-btn" aria-label="Expand map">+</button>
     </div>
   </figure>
 
