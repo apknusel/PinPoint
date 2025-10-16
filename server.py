@@ -277,12 +277,11 @@ def profile(username):
 def profile_settings(username):
     return render_template("profile_settings.html", username=username)
 
-
 @app.route("/api/search_users")
 def search():
     name = request.args.get('name')
     pool = current_app.config["DB_POOL"]
-    matching_users = db.fetch_users(pool, name)
+    matching_users = db.fetch_users(pool, name, search_for="display_name")
     return jsonify(matching_users)
 
 @app.route("/follower_request_create", methods=['POST'])
