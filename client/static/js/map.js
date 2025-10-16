@@ -2,42 +2,30 @@ let map;
 
 async function initMap() {
     let center = { lat: 44.9778, lng: -93.2650 };
-    let user_location = false;
     mapboxgl.accessToken = window.MAPBOX_ACCESS_TOKEN;
-    try {
-        const response = await getLocationPromise();
-        center = { lat: response.coords.latitude, lng: response.coords.longitude };
-        console.log("promise resolve");
-        user_location = true;
-    } catch (e) {
-        console.error(e);
-    }
-    console.log(center);
     map = new mapboxgl.Map({
         container: 'map',
         style: 'mapbox://styles/mapbox/standard',
         center: [center.lng, center.lat],
         zoom: 2
     });
-     map.flyTo({
-            center: center,
-            zoom: 11,
-            speed: 1.5,
-            curve: 1.4,
-            essential: true,
-        });
-    if (user_location) {
-        const popup = new mapboxgl.Popup({ closeButton: false, closeOnClick: false })
-            .setLngLat(center)
-            .setHTML(
-                `<div style="max-width: 100px; padding: 4px 6px; text-align: center;">
-            You are Here!
-        </div>`
-            )
-            .addTo(map);
-    }
-
+    map.flyTo({
+        center: center,
+        zoom: 11,
+        speed: 1.5,
+        curve: 1.4,
+        essential: true,
+    });
     map.addControl(new mapboxgl.NavigationControl());
+    map.addControl(
+        new mapboxgl.GeolocateControl({
+            positionOptions: {
+                enableHighAccuracy: true
+            },
+            trackUserLocation: true,
+            showUserHeading: true
+        })
+    );
 
     await loadPosts();
 }
