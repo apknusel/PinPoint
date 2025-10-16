@@ -32,6 +32,9 @@
     <!-- Map overlay -->
     <div class="post-map-overlay" id="mapOverlay">
       <div id="postMap" class="post-map" data-lat="{{ post.latitude }}" data-lng="{{ post.longitude }}"></div>
+      <button id="mapReset" class="map-reset-btn" aria-label="Reset map view">
+        <i data-lucide="rotate-ccw"></i>
+      </button>
       <button id="mapToggle" class="map-toggle-btn" aria-label="Expand map">
         <i data-lucide="maximize"></i>
       </button>
