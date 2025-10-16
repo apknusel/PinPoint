@@ -13,7 +13,10 @@ async function initMap() {
 
     map.addControl(new mapboxgl.NavigationControl());
 
-    // Fetch and display posts
+    map.on('load', () => {
+        getLocation();
+    });
+    
     await loadPosts();
 }
 
@@ -26,7 +29,7 @@ async function loadPosts() {
         }
 
         const posts = await response.json();
-        
+
         // If there are posts, center the map on the first one
         if (posts.length > 0) {
             map.flyTo({
@@ -34,14 +37,14 @@ async function loadPosts() {
                 zoom: 2
             });
         }
-        
+
         // Create markers for each post
         posts.forEach(post => {
             const marker = new mapboxgl.Marker()
                 .setLngLat([post.longitude, post.latitude])
                 .setPopup(
                     new mapboxgl.Popup({ offset: 25 })
-                    .setHTML(`
+                        .setHTML(`
                         <div style="max-width: 200px;">
                             <h3 style="margin: 0 0 8px 0;">${escapeHtml(post.nickname)}</h3>
                             <p style="margin: 0;">${escapeHtml(post.caption)}</p>

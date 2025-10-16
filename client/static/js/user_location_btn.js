@@ -1,8 +1,3 @@
-
-const btn = document.getElementById("userLocationBtn");
-const message = document.getElementById('message');
-
-btn.addEventListener('click', getLocation);
 function getLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(success, error);
@@ -12,21 +7,26 @@ function getLocation() {
 }
 
 function success(position) {
-    const newLocation = { lat: position.coords.latitude, lng: position.coords.longitude };
+    const newLocation = [position.coords.longitude, position.coords.latitude];
 
-    map.setCenter(newLocation);
-    map.setZoom(12);
-    const user_location = new google.maps.InfoWindow({
-        content:
-            `<div style= "max-width: 50px; max-height: 20px padding: 4px 6px;  font-size: 15px; text-align: center;">
-                         You are Here!
-                    </div>`
+    const popup = new mapboxgl.Popup({ closeButton: false, closeOnClick: false })
+        .setLngLat(newLocation)
+        .setHTML(
+            `<div style="max-width: 100px; padding: 4px 6px; text-align: center;">
+            You are Here!
+        </div>`
+        )
+        .addTo(map);
+
+    map.flyTo({
+        center: newLocation,
+        zoom: 11,
+        speed: 2,
+        curve: 1.4,
+        essential: true,
     });
-
-    user_location.setPosition(newLocation);
-    user_location.open(map);
 }
 
-function error() {
+function error(e) {
     console.error("Location not found");
 }
