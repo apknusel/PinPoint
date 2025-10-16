@@ -272,11 +272,6 @@ def profile(username):
                             posts=posts)
 
     
-
-@app.route("/profile/<username>/map")
-def profile_map(username):
-    return render_template("profile_map.html", username=username)
-
 # TODO: Make sure this route has authentication and authorization setup so you can only access your own user settings
 @app.route("/profile/<username>/settings")
 def profile_settings(username):

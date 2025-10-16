@@ -4,6 +4,16 @@
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/follower.css') }}">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.css" rel="stylesheet">
+{% endblock %}
+
+{% block scripts %} 
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.js"></script>
+<script src="{{ url_for('static', filename='js/profile_map.js') }}"></script>
+{% endblock %}
+
+{% block left %}
+<div id="profileMap" class="profile-map-container" data-username="{{ username }}" data-mapbox-token="{{ mapbox_access_token }}"></div>
 {% endblock %}
 
 {% block center %}
