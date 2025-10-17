@@ -48,7 +48,7 @@ async function loadPosts() {
                     new mapboxgl.Popup({ offset: 25 })
                         .setHTML(`
                         <div style="max-width: 200px;">
-                            <h3 style="margin: 0 0 8px 0;">${escapeHtml(post.nickname)}</h3>
+                            <h3 style="margin: 0 0 8px 0;">${escapeHtml(post.display_name)}</h3>
                             <p style="margin: 0;">${escapeHtml(post.caption)}</p>
                             <a href="/post/${post.post_id}" style="display: inline-block; margin-top: 8px;">View Post</a>
                         </div>

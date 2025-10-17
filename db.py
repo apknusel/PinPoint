@@ -55,7 +55,7 @@ def fetch_posts(pool):
                     p.post_id,
                     p.caption,
                     p.user_id,
-                    u.nickname,
+                    u.display_name,
                     ST_X(p.location) AS longitude,
                     ST_Y(p.location) AS latitude
                 FROM Posts p
@@ -69,7 +69,7 @@ def fetch_posts(pool):
                 "post_id": r["post_id"],
                 "caption": r["caption"],
                 "user_id": r["user_id"],
-                "nickname": r["nickname"],
+                "display_name": r["display_name"],
                 "latitude": r["latitude"],
                 "longitude": r["longitude"],
             }
