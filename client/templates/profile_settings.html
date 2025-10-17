@@ -1,7 +1,36 @@
 {% extends '3-5.html' %}
 
-{% block title %}Profile Map{% endblock %}
+{% block title %}Profile Settings{% endblock %}
 
 {% block center %}
-	<h1>{{username}}'s Settings</h1>
+	<h1>{{ display_name }}'s Settings</h1>    
+    <form class="pure-form pure-form-stacked" method="POST" action="{{ url_for('handle_update_profile_settings') }}">
+        <fieldset>
+            <legend>Profile Information</legend>
+
+            <label for="display_name">Current Display Name</label>
+            <input type="text" 
+                   id="display_name" 
+                   name="display_name" 
+                   value="{{ display_name }}" 
+                   class="pure-input-1"
+                   maxlength="50">
+            <span class="pure-form-message">This is how other users see you.</span>
+            
+            <label for="privacy_settings">Current Privacy Settings</label>
+            <select id="privacy_settings" name="privacy_settings" class="pure-input-1">
+                {% if public %}
+                <option value="public" selected>Public - Anyone can see your profile</option>
+                <option value="private">Private - Only you and your followers can see your profile</option>
+                {% else %}
+                <option value="public">Public - Anyone can see your profile</option>
+                <option value="private" selected>Private - Only you and your followers can see your profile</option>
+                {% endif %}
+            </select>
+            
+            <button type="submit" class="pure-button pure-button-primary" style="margin-top: 1rem;">
+                Update Profile
+            </button>
+        </fieldset>
+    </form>
 {% endblock %}
