@@ -278,11 +278,11 @@ def profile(user_id):
 @requires_auth
 def settings_root():
     userinfo = session["userinfo"]
-    return redirect(url_for("profile_settings", username=userinfo.get("nickname")))
+    return redirect(url_for("profile_settings", user_id=userinfo.get("sub")))
 
-@app.route("/profile/<username>/settings")
+@app.route("/profile/settings/<user_id>")
 @requires_auth
-def profile_settings(username):
+def profile_settings(user_id):
     pool = current_app.config["DB_POOL"]
     userinfo = session["userinfo"]
     user_id = userinfo.get("sub")
