@@ -112,7 +112,7 @@ def fetch_posts_by_username(pool, username):
     finally:
         pool.putconn(conn)
 
-def insert_post_with_media(pool, post_id, caption, user_id, lng, lat, media_id, file_name, file_bytes):
+def insert_post_with_media(pool, post_id, caption, user_id, lng, lat, media_id, file_name, file_bytes, thumbnail_bytes):
     conn = pool.getconn()
     try:
         with conn.cursor(cursor_factory=DictCursor) as cur:
@@ -125,10 +125,10 @@ def insert_post_with_media(pool, post_id, caption, user_id, lng, lat, media_id, 
             )
             cur.execute(
                 """
-                INSERT INTO Media (media_id, file_name, file_data, post_id)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO Media (media_id, file_name, file_data, thumbnail_data, post_id)
+                VALUES (%s, %s, %s, %s, %s)
                 """,
-                (media_id, file_name, file_bytes, post_id),
+                (media_id, file_name, file_bytes, thumbnail_bytes, post_id),
             )
         conn.commit()
     finally:
@@ -200,9 +200,7 @@ def fetch_users_post_images(pool, nickname):
             cur.execute(
                 """
                 SELECT p.post_id,
-                       p.user_id,
-                       u.nickname,
-                       m.file_data
+                       m.thumbnail_data
                 FROM Users u
                 JOIN Posts p ON p.user_id = u.user_id
                 LEFT JOIN Media m ON m.post_id = p.post_id
@@ -213,9 +211,9 @@ def fetch_users_post_images(pool, nickname):
             )
             rows = cur.fetchall()
         return [
-                {
+            {
                 "post_id": r["post_id"],
-                "image_data": base64.b64encode(r["file_data"]).decode("utf-8")
+                "image_data": base64.b64encode(r["thumbnail_data"]).decode("utf-8")
             }
             for r in rows
         ]
@@ -344,7 +342,7 @@ def fetch_nearest_posts(pool, post_id, k=5):
                     p2.post_id,
                     p2.caption,
                     u.display_name,
-                    m.file_data
+                    m.thumbnail_data
                 FROM Posts p1
                 JOIN Posts p2 ON p2.post_id <> p1.post_id
                 JOIN Users u ON u.user_id = p2.user_id
@@ -363,7 +361,7 @@ def fetch_nearest_posts(pool, post_id, k=5):
                     "post_id": r["post_id"],
                     "caption": r["caption"],
                     "display_name": r["display_name"],
-                    "image_data": base64.b64encode(r["file_data"]).decode("utf-8") if r["file_data"] else None,
+                    "image_data": base64.b64encode(r["thumbnail_data"]).decode("utf-8") if r["thumbnail_data"] else None,
                 }
                 for r in rows
             ]
@@ -538,9 +536,7 @@ def fetch_users_post_images_by_user_id(pool, user_id):
             cur.execute(
                 """
                 SELECT p.post_id,
-                       p.user_id,
-                       u.nickname,
-                       m.file_data
+                       m.thumbnail_data
                 FROM Users u
                 JOIN Posts p ON p.user_id = u.user_id
                 LEFT JOIN Media m ON m.post_id = p.post_id
@@ -553,7 +549,7 @@ def fetch_users_post_images_by_user_id(pool, user_id):
         return [
             {
                 "post_id": r["post_id"],
-                "image_data": base64.b64encode(r["file_data"]).decode("utf-8")
+                "image_data": base64.b64encode(r["thumbnail_data"]).decode("utf-8")
             }
             for r in rows
         ]
