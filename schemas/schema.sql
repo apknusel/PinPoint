@@ -43,6 +43,7 @@ CREATE TABLE Media (
   media_id TEXT PRIMARY KEY,
   file_name TEXT NOT NULL,
   file_data BYTEA NOT NULL,
+  thumbnail_data BYTEA,
   post_id TEXT NOT NULL,
   FOREIGN KEY (post_id) REFERENCES Posts(post_id) ON DELETE CASCADE
 );

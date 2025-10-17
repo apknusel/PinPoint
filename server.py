@@ -197,6 +197,26 @@ def post(post_id):
     return render_template("post.html", post=post, comments=comments, recommended_posts=recommended_posts)
 
 
+def optimize_image(file_storage, quality=80):
+    file_storage.stream.seek(0)
+    img = Image.open(file_storage.stream)
+    if img.mode not in ("RGB", "L"):
+        img = img.convert("RGB")
+    img.thumbnail(img.size, Image.Resampling.LANCZOS)
+    out = io.BytesIO()
+    img.save(out, format="JPEG", quality=quality, optimize=True, progressive=True)
+    return out.getvalue()
+
+def create_thumbnail(file_storage, max_size=320, quality=70):
+    file_storage.stream.seek(0)
+    img = Image.open(file_storage.stream)
+    if img.mode not in ("RGB", "L"):
+        img = img.convert("RGB")
+    img.thumbnail((max_size, max_size), Image.Resampling.LANCZOS)
+    out = io.BytesIO()
+    img.save(out, format="JPEG", quality=quality, optimize=True, progressive=True)
+    return out.getvalue()
+
 @app.route("/create/post", methods=["GET", "POST"])
 @requires_auth
 def create_post():
@@ -218,17 +238,13 @@ def create_post():
         return "Invalid coordinates", 400
     post_id = str(uuid.uuid4())
     media_id = str(uuid.uuid4())
-    try:
-        file_bytes = optimize_image(file, quality=80)
-        base, _ = os.path.splitext(file.filename or "upload")
-        file_name = f"{base}.jpg"
-    except Exception:
-        file.stream.seek(0)
-        file_bytes = file.read()
-        file_name = file.filename or "upload"
+    file_bytes = optimize_image(file, quality=80)
+    thumb_bytes = create_thumbnail(file, max_size=320, quality=70)
+    base, _ = os.path.splitext(file.filename or "upload")
+    file_name = f"{base}.jpg"
     pool = current_app.config["DB_POOL"]
     db.insert_post_with_media(
-        pool, post_id, caption, user_id, lng_f, lat_f, media_id, file_name, file_bytes)
+        pool, post_id, caption, user_id, lng_f, lat_f, media_id, file_name, file_bytes, thumb_bytes)
     return redirect(url_for("post", post_id=post_id))
 
 
@@ -351,13 +367,3 @@ def get_request_info(followee, follower=None):
         result["followee_id"] = followee
 
     return result
-
-def optimize_image(file_storage, quality=80):
-    file_storage.stream.seek(0)
-    img = Image.open(file_storage.stream)
-    if img.mode not in ("RGB", "L"):
-        img = img.convert("RGB")
-    img.thumbnail(img.size, Image.Resampling.LANCZOS)
-    out = io.BytesIO()
-    img.save(out, format="JPEG", quality=quality, optimize=True, progressive=True)
-    return out.getvalue()
