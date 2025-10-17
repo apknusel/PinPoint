@@ -244,12 +244,14 @@ def profile(user_id):
     pool = current_app.config["DB_POOL"]
     userinfo = session.get("userinfo")
 
-    profile_user = db.fetch_users(pool, username, True)
-    followers_data = db.fetch_followers(pool, profile_user[0]['user_id'])
-    display_name = session["display_name"]
-    profile_picture = db.fetch_user_profile_image(pool, username)
-    posts = db.fetch_users_post_images(pool, username)
+    profile_user = db.fetch_user_by_id(pool, user_id)
+    if not profile_user:
+        return redirect(url_for("index"))
 
+    followers_data = db.fetch_followers(pool, user_id)
+    display_name = profile_user.get('display_name')
+    profile_picture = db.fetch_user_profile_image_by_user_id(pool, user_id)
+    posts = db.fetch_users_post_images_by_user_id(pool, user_id)
     relation = None
     is_self = False
     current_user = False
