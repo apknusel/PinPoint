@@ -33,13 +33,13 @@ async function filterFunction() {
     return;
   }
 
-  for (const { user_id, nickname, display_name, picture } of user_data) {
-    user = createElement(nickname, display_name, picture);
+  for (const { display_name, nickname, picture, user_id } of user_data) {
+    user = createElement(user_id, display_name, picture);
     search_results.append(user);
   }
 }
 
-function createElement(userId, name, picture) {
+function createElement(userId, display_name, picture) {
   const link = document.createElement('a');
   link.href = url.replace('__id__', encodeURIComponent(userId));
   link.className = "dropdown-entries";

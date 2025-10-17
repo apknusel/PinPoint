@@ -112,6 +112,23 @@
     background: #f6f6f6;
 }
 
+.btn-follow {
+    background: var(--follower-add-btn);
+    border-color: var(--follower-add-btn);
+    color: #fff;
+}
+
+.btn-follow:hover {
+    background: var(--follower-add-btn-hover);
+    border-color: var(--follower-add-btn-hover);
+}
+
+.btn:disabled,
+.btn-follow:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .btn-remove {
     margin-left: auto;
     background: var(--follower-view-btn);
@@ -155,7 +172,7 @@
 }
 
 .btn-accept:hover {
-    filter: brightness(1.05);
+    background: #497929;
 }
 
 .btn-decline {
@@ -165,4 +182,8 @@
 
 .btn-decline:hover {
     background: #f6f6f6;
+}
+
+.follower-entries:hover {
+    cursor: pointer;
 }

@@ -371,11 +371,11 @@ def fetch_followers(pool, user_id):
                 """
                 SELECT 
                 f.follower_id,
-                u1.nickname AS follower_name,
+                u1.display_name AS follower_name,
                 u1.picture  AS follower_picture,
                 u1.email AS follower_email,
                 f.followee_id,
-                u2.nickname AS followee_name,
+                u2.display_name AS followee_name,
                 f.is_accepted,
                 f.created_at
                 FROM followers f
@@ -414,9 +414,6 @@ def fetch_followers(pool, user_id):
 
 def handle_follow_request(pool, follower_id , followee_id, accept=False):
     conn = pool.getconn()
-    print(accept)
-    print("folower:" , follower_id)
-    print("folowee:", followee_id)
     try:
         with conn.cursor(cursor_factory=DictCursor) as cur:
             if accept == True:

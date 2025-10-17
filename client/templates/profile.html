@@ -10,7 +10,7 @@
 {% block scripts %}
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.js"></script>
 <script src="{{ url_for('static', filename='js/profile_map.js') }}"></script>
-<script src="{{ url_for('static', filename='js/follower.js') }}"></script>
+<script src="{{ url_for('static', filename='js/follower.js') }}" async defer></script>
 {% endblock %}
 
 {% block content %}
