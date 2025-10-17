@@ -6,37 +6,92 @@ const add_follower = document.getElementById('addFollower');
 
 
 async function requestFollowing() {
-    followee_name = pathParts[2];
+    const followee_id = pathParts[2];
+    const prevText = add_follower.innerText;
+    add_follower.disabled = true;
+
     try {
-        const response = await fetch(`/follower_request_create?followee=${followee_name}`, { method: "POST" });
+        const response = await fetch(`/follower_request_create?followee=${encodeURIComponent(followee_id)}`, { method: "POST" });
         const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Server Error");
 
-        if (!response.ok)
-            throw new Error(data.error || "Server Error");
-
+        add_follower.innerText = "pending";
     } catch (e) {
         console.log(e.message);
+        add_follower.disabled = false;
+        add_follower.innerText = prevText;
     }
-    add_follower.innerHTML = "pending";
 }
 
 async function requestHandler(event, action) {
-    followee_name = pathParts[2];
-    const li = event.currentTarget.closest('li');
-    follower_name = event.target.value;
+    const followee_id = decodeURI(pathParts[2]);
+    const follower_id = event.target.value;
+
+    const item = (event.target.closest('li') || event.target.closest('div'));
+
     try {
         const response = await fetch("/follower_request_handler", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ follower: follower_name, followee: followee_name, action: action })
+            body: JSON.stringify({ follower: follower_id, followee: followee_id, action: action })
         });
-
         const data = await response.json();
-        if (!response.ok)
-            throw new Error(data.error || "Server Error");
-        (event.target.closest('li') || event.target.closest('div'))?.remove();
+        if (!response.ok) throw new Error(data.error || "Server Error");
 
+        if (action === true) {
+            const followersList = document.querySelector('.follower-list');
+            if (followersList) {
+                const name = item?.querySelector('.follower-name')?.textContent?.trim() || 'Follower';
+                const picture = item?.querySelector('img.follower-avatar')?.src || '';
+
+                const entry = document.createElement('div');
+                entry.className = 'follower-entries';
+                entry.dataset.userId = follower_id;
+
+                const img = document.createElement('img');
+                img.className = 'follower-avatar';
+                img.src = picture;
+                img.alt = name;
+
+                const info = document.createElement('div');
+                info.className = 'follower-info';
+
+                const h3 = document.createElement('h3');
+                h3.className = 'follower-name';
+                h3.textContent = name;
+
+                const date = document.createElement('p');
+                date.className = 'follower-date';
+                date.textContent = 'Just now';
+
+                info.appendChild(h3);
+                info.appendChild(date);
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'btn btn-remove';
+                removeBtn.value = follower_id;
+                removeBtn.textContent = 'Remove';
+                removeBtn.addEventListener('click', (e) => requestHandler(e, false));
+
+                entry.appendChild(img);
+                entry.appendChild(info);
+                entry.appendChild(removeBtn);
+
+                followersList.prepend(entry);
+            }
+        }
+
+        item?.remove();
     } catch (e) {
         console.log(e.message);
     }
 }
+
+document.addEventListener('click', (e) => {
+    const entry = e.target.closest('.follower-entries');
+    if (e.target.closest('button')) {
+        return;
+    }
+    const userId = entry.dataset.userId;
+    if (userId) window.location.href = `/profile/${encodeURIComponent(userId)}`;
+});

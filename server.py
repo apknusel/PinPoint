@@ -4,7 +4,7 @@ import uuid
 import io
 from flask import Flask, render_template, redirect, url_for, current_app, session, request, jsonify
 from authlib.integrations.flask_client import OAuth
-from urllib.parse import quote_plus, urlencode
+from urllib.parse import quote_plus, urlencode, unquote_plus
 from dotenv import load_dotenv
 from functools import wraps
 from PIL import Image, ImageOps
@@ -134,12 +134,12 @@ def get_profile_status():
         'profile_complete': profile_complete
     })
 
+# TODO: This needs 
 @app.route("/complete_profile", methods=["GET", "POST"])
+@requires_auth
 def complete_profile():
-    userinfo = session.get("userinfo")
-    if session.get('profile_complete'):
-        return redirect(url_for("index"))
     if request.method == 'POST':
+        userinfo = session.get("userinfo")
         pool = current_app.config["DB_POOL"]
         user_id = userinfo.get("sub")
         display_name = request.form.get('display_name')
@@ -163,6 +163,11 @@ def get_posts():
 def get_posts_by_username(username):
     pool = current_app.config["DB_POOL"]
     return jsonify(db.fetch_posts_by_username(pool, username))
+
+@app.route("/api/posts/by-user/<user_id>")
+def get_posts_by_user_id(user_id):
+    pool = current_app.config["DB_POOL"]
+    return jsonify(db.fetch_posts_by_user_id(pool, user_id))
 
 @app.route("/api/<post_id>/comment", methods=["POST"])
 @requires_auth
@@ -231,11 +236,11 @@ def create_post():
 @requires_auth
 def profile_root():
     userinfo = session["userinfo"]
-    return redirect(url_for("profile", username=userinfo.get("nickname")))
+    return redirect(url_for("profile", user_id=userinfo.get("sub")))
 
 
-@app.route("/profile/<username>")
-def profile(username):
+@app.route("/profile/<user_id>")
+def profile(user_id):
     pool = current_app.config["DB_POOL"]
     userinfo = session.get("userinfo")
 
@@ -252,24 +257,20 @@ def profile(username):
     if userinfo:
         for follower_by in followers_data['followed_by']:
             if follower_by['follower_id'] == userinfo['sub']:
-                if not follower_by['is_accepted']:
-                    relation = "pending" 
-                else:
-                    relation = "following"
+                relation = "pending" if not follower_by['is_accepted'] else "following"
                 break
-        current_user = userinfo['nickname']
-        if current_user.lower() == username.lower():
-            is_self = True
+        current_user = userinfo.get('nickname')
+        is_self = (userinfo.get('sub') == user_id)
 
     return render_template("profile.html",
-                            username=username, 
-                            display_name=display_name,
-                            is_self=is_self,
-                            current_user=current_user, 
-                            followers_data=followers_data,
-                            relation=relation,
-                            profile_picture=profile_picture,
-                            posts=posts)
+                           username=user_id,
+                           display_name=display_name,
+                           is_self=is_self,
+                           current_user=current_user,
+                           followers_data=followers_data,
+                           relation=relation,
+                           profile_picture=profile_picture,
+                           posts=posts)
 
 @app.route("/settings")
 @requires_auth
@@ -310,7 +311,7 @@ def search():
 
 @app.route("/follower_request_create", methods=['POST'])
 def follower_request_creation():
-    followee = request.args.get('followee', '')
+    followee = unquote_plus(request.args.get('followee', ''))
     info = get_request_info(followee)
     if info['followee_id'] is None:
         return jsonify({"success": False, "error": "User not found"}), 404
@@ -329,32 +330,23 @@ def follower_request_handler():
     return jsonify({"success": True})
 
 def get_request_info(followee, follower=None):
-    followee = followee.strip()
+    followee = (followee or "").strip()
     pool = current_app.config["DB_POOL"]
     userinfo = session.get("userinfo")
 
     result = {
-            "follower_id": None,
-            "followee_id": None,
-            "pool": pool
-        }
-    
+        "follower_id": None,
+        "followee_id": None,
+        "pool": pool
+    }
+
     if follower:
-        matching_follower = db.fetch_users(pool, follower, True)
-        if matching_follower:
-            result["follower_id"] = matching_follower[0]['user_id']
-      
+        result["follower_id"] = follower.strip()
     elif userinfo:
         result["follower_id"] = userinfo.get("sub")
-    else:
-        result["follower_id"] = None
 
-    matching_followee = db.fetch_users(pool, followee, True)
-
-    if matching_followee:
-        result["followee_id"] = matching_followee[0]['user_id']
-    else:
-        result["followee_id"] = None
+    if followee:
+        result["followee_id"] = followee
 
     return result
 

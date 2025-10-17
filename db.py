@@ -393,11 +393,11 @@ def fetch_followers(pool, user_id):
                 """
                 SELECT 
                 f.follower_id,
-                u1.nickname AS follower_name,
+                u1.display_name AS follower_name,
                 u1.picture  AS follower_picture,
                 u1.email AS follower_email,
                 f.followee_id,
-                u2.nickname AS followee_name,
+                u2.display_name AS followee_name,
                 f.is_accepted,
                 f.created_at
                 FROM followers f
@@ -436,9 +436,6 @@ def fetch_followers(pool, user_id):
 
 def handle_follow_request(pool, follower_id , followee_id, accept=False):
     conn = pool.getconn()
-    print(accept)
-    print("folower:" , follower_id)
-    print("folowee:", followee_id)
     try:
         with conn.cursor(cursor_factory=DictCursor) as cur:
             if accept == True:
@@ -459,6 +456,107 @@ def handle_follow_request(pool, follower_id , followee_id, accept=False):
                 (follower_id, followee_id)
                 )
             conn.commit()
+    finally:
+        pool.putconn(conn)
+
+def fetch_posts_by_user_id(pool, user_id):
+    conn = pool.getconn()
+    try:
+        with conn.cursor(cursor_factory=DictCursor) as cur:
+            cur.execute(
+                """
+                SELECT 
+                    p.post_id,
+                    p.caption,
+                    p.user_id,
+                    u.nickname,
+                    u.display_name,
+                    ST_X(p.location) AS longitude,
+                    ST_Y(p.location) AS latitude
+                FROM Posts p
+                JOIN Users u ON p.user_id = u.user_id
+                WHERE p.location IS NOT NULL AND u.user_id = %s
+                """,
+                (user_id,)
+            )
+            rows = cur.fetchall()
+        return [
+            {
+                "post_id": r["post_id"],
+                "caption": r["caption"],
+                "user_id": r["user_id"],
+                "nickname": r["nickname"],
+                "display_name": r["display_name"],
+                "latitude": r["latitude"],
+                "longitude": r["longitude"],
+            }
+            for r in rows
+        ]
+    finally:
+        pool.putconn(conn)
+
+def fetch_user_by_id(pool, user_id):
+    conn = pool.getconn()
+    try:
+        with conn.cursor(cursor_factory=DictCursor) as cur:
+            cur.execute(
+                """
+                SELECT user_id, nickname, email, picture, display_name, public
+                FROM users
+                WHERE user_id = %s
+                """,
+                (user_id,)
+            )
+            row = cur.fetchone()
+            return dict(row) if row else None
+    finally:
+        pool.putconn(conn)
+
+def fetch_user_profile_image_by_user_id(pool, user_id):
+    conn = pool.getconn()
+    try:
+        with conn.cursor(cursor_factory=DictCursor) as cur:
+            cur.execute(
+                """
+                SELECT picture
+                FROM Users
+                WHERE user_id = %s
+                """,
+                (user_id,)
+            )
+            row = cur.fetchone()
+            if not row:
+                return None
+            return {"picture": row["picture"]}
+    finally:
+        pool.putconn(conn)
+
+def fetch_users_post_images_by_user_id(pool, user_id):
+    conn = pool.getconn()
+    try:
+        with conn.cursor(cursor_factory=DictCursor) as cur:
+            cur.execute(
+                """
+                SELECT p.post_id,
+                       p.user_id,
+                       u.nickname,
+                       m.file_data
+                FROM Users u
+                JOIN Posts p ON p.user_id = u.user_id
+                LEFT JOIN Media m ON m.post_id = p.post_id
+                WHERE u.user_id = %s
+                ORDER BY p.created_at DESC
+                """,
+                (user_id,)
+            )
+            rows = cur.fetchall()
+        return [
+            {
+                "post_id": r["post_id"],
+                "image_data": base64.b64encode(r["file_data"]).decode("utf-8")
+            }
+            for r in rows
+        ]
     finally:
         pool.putconn(conn)
 

@@ -19,7 +19,7 @@ async function initMap() {
             showUserHeading: true
         })
     );
-
+    map.addControl(new ResetControl(center, 2));
     await loadPosts();
 }
 
@@ -32,7 +32,6 @@ async function loadPosts() {
         }
 
         const posts = await response.json();
-
 
         // If there are posts, center the map on the first one
         if (posts.length > 0) {
