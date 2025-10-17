@@ -11,8 +11,6 @@
 }
 
 .post {
-  border: 2px solid var(--color-primary);
-  background-color: var(--color-neutral);
   height: 300px;
   margin: 10px;
 }
@@ -27,6 +25,8 @@
 
 .post a img {
   max-height: 100%;
+  border-radius: 10px;
+  border: 2px solid var(--border-color);
 }
 
 .post-link:hover {
