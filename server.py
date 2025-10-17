@@ -141,11 +141,11 @@ def complete_profile():
     if request.method == 'POST':
         userinfo = session.get("userinfo")
         pool = current_app.config["DB_POOL"]
-        nickname = userinfo.get("nickname")
+        user_id = userinfo.get("sub")
         display_name = request.form.get('display_name')
         privacy_settings = (request.form.get('privacy_settings') == "public")
         
-        db.complete_profile(pool, nickname, display_name, privacy_settings)
+        db.update_profile_settings(pool, user_id, display_name, privacy_settings)
         
         session['profile_complete'] = True
         session['display_name'] = display_name
@@ -252,7 +252,6 @@ def profile(user_id):
     display_name = profile_user.get('display_name')
     profile_picture = db.fetch_user_profile_image_by_user_id(pool, user_id)
     posts = db.fetch_users_post_images_by_user_id(pool, user_id)
-
     relation = None
     is_self = False
     current_user = False
@@ -275,10 +274,35 @@ def profile(user_id):
                            profile_picture=profile_picture,
                            posts=posts)
 
-# TODO: Make sure this route has authentication and authorization setup so you can only access your own user settings
-@app.route("/profile/<user_id>/settings")
+@app.route("/settings")
+@requires_auth
+def settings_root():
+    userinfo = session["userinfo"]
+    return redirect(url_for("profile_settings", user_id=userinfo.get("sub")))
+
+@app.route("/profile/settings/<user_id>")
+@requires_auth
 def profile_settings(user_id):
-    return render_template("profile_settings.html", username=user_id)
+    pool = current_app.config["DB_POOL"]
+    userinfo = session["userinfo"]
+    user_id = userinfo.get("sub")
+    current_settings = db.fetch_user_settings(pool, user_id)
+    return render_template("profile_settings.html", 
+                           display_name=current_settings["display_name"],
+                           public=current_settings["public"])
+
+@app.route("/update_profile_settings", methods=["POST"])
+def handle_update_profile_settings():
+    pool = current_app.config["DB_POOL"]
+    userinfo = session["userinfo"]
+    user_id = userinfo.get("sub")
+    print(user_id)
+    display_name = request.form.get('display_name')
+    privacy_settings = (request.form.get('privacy_settings') == "public")
+    db.update_profile_settings(pool, user_id, display_name, privacy_settings)
+    session['display_name'] = display_name
+    session['public'] = privacy_settings
+    return redirect(url_for("profile_root"))
 
 @app.route("/api/search_users")
 def search():

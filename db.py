@@ -23,22 +23,6 @@ def upsert_user(pool, user_id, nickname, email, picture):
     finally:
         pool.putconn(conn)
 
-def complete_profile(pool, nickname, display_name, privacy_settings):
-    conn = pool.getconn()
-    try:
-        with conn.cursor(cursor_factory=DictCursor) as cur:
-            cur.execute(
-                """
-                UPDATE Users
-                SET display_name = %s, public = %s
-                WHERE nickname = %s
-                """,
-                (display_name, privacy_settings, nickname),
-            )
-        conn.commit()
-    finally:
-        pool.putconn(conn)
-
 def check_profile_complete(pool, nickname):
     conn = pool.getconn()
     try:
@@ -309,6 +293,44 @@ def fetch_users(pool, name, exact_match=False, search_for="nickname"):
 
             rows = cur.fetchall()
             return [dict(row) for row in rows]
+    finally:
+        pool.putconn(conn)
+
+def fetch_user_settings(pool, user_id):
+    conn = pool.getconn()
+    try:
+        with conn.cursor(cursor_factory=DictCursor) as cur:
+            cur.execute(
+                """
+                SELECT u.display_name, u.public
+                FROM Users u
+                WHERE u.user_id = %s
+                """,
+                (user_id,)
+            )
+            row = cur.fetchone()
+            if not row:
+                return None
+            return { 
+                "display_name": row["display_name"],
+                "public": row["public"],
+            }
+    finally:
+        pool.putconn(conn)
+    
+def update_profile_settings(pool, user_id, display_name, privacy_settings):
+    conn = pool.getconn()
+    try:
+        with conn.cursor(cursor_factory=DictCursor) as cur:
+            cur.execute(
+                """
+                UPDATE Users
+                SET display_name = %s, public = %s
+                WHERE user_id = %s
+                """,
+                (display_name, privacy_settings, user_id),
+            )
+        conn.commit()
     finally:
         pool.putconn(conn)
 
