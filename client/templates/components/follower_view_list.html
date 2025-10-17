@@ -1,7 +1,8 @@
+{% if followers_data.followed_by and followers_data.followed_by|selectattr('is_accepted')|list %}
 <h3 class="section-title">Followers</h3>
 <div class="follower-list">
-{% for follower in followers_data.followed_by %}
-{% if follower['is_accepted'] %}
+    {% for follower in followers_data.followed_by %}
+    {% if follower['is_accepted'] %}
     <div class="follower-entries" data-user-id="{{ follower['follower_id'] }}">
         <img class="follower-avatar" src="{{follower['follower_picture']}}" alt="{{ follower['follower_name'] }}" />
         <div class="follower-info">
@@ -14,6 +15,12 @@
         </button>
         {% endif %}
     </div>
-{% endif %}
-{% endfor %}
+    {% endif %}
+    {% endfor %}
 </div>
+{% else %}
+<div>
+    <h3 class="section-title">Followers</h3>
+    <p>No followers</p>
+</div>
+{% endif %}
