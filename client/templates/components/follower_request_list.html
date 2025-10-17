@@ -1,25 +1,22 @@
 {% if is_self %}
-<div class="pure-u-1-4">
-    <h2>Requests:</h2>
-    <ul class="request-container">
-        {% for follower in followers_data.followed_by %}
-        {% if not follower['is_accepted']%}
-        <li class="request-li">
-            <img src="{{follower['follower_picture']}}" />
-            <div class="user-info-container">
-                <h3>{{follower['follower_name']}}</h3>
-                <p>{{follower['follower_email']}}</p>
-            </div>
-            <div class="button-container">
-                <button type="button" value="{{ follower['follower_name'] }}"
-                    onclick="requestHandler(event, true)">✓</button>
-                <button type="button" value="{{ follower['follower_name'] }}"
-                    onclick="requestHandler(event, false)">x</button>
-            </div>
-        </li>
-        {% endif %}
-        {% endfor %}
-    </ul>
-</div>
+<h3 class="section-title">Follow Requests</h3>
+<ul class="request-container request-list">
+    {% for follower in followers_data.followed_by %}
+    {% if not follower['is_accepted']%}
+    <li class="request-li">
+        <img class="follower-avatar" src="{{follower['follower_picture']}}" alt="{{follower['follower_name']}}" />
+        <div class="user-info-container">
+            <h3 class="follower-name">{{follower['follower_name']}}</h3>
+            <p class="follower-email">{{follower['follower_email']}}</p>
+        </div>
+        <div class="request-actions">
+            <button type="button" value="{{ follower['follower_id'] }}" class="btn btn-accept"
+                onclick="requestHandler(event, true)">Accept</button>
+            <button type="button" value="{{ follower['follower_id'] }}" class="btn btn-decline"
+                onclick="requestHandler(event, false)">Decline</button>
+        </div>
+    </li>
+    {% endif %}
+    {% endfor %}
+</ul>
 {% endif %}
-<script src="{{ url_for('static', filename='js/follower.js') }}"></script>
