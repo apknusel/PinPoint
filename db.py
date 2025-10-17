@@ -286,23 +286,23 @@ def fetch_comments(pool, post_id):
     finally:
         pool.putconn(conn)
 
-def fetch_users(pool, name, exact_match=False):
+def fetch_users(pool, name, exact_match=False, search_for="nickname"):
     conn = pool.getconn()
     try:
         with conn.cursor(cursor_factory=DictCursor) as cur:
             if (exact_match):
                 cur.execute(
-                    """
+                    f"""
                 SELECT user_id, nickname, display_name, picture 
-                FROM users WHERE LOWER(nickname) = LOWER(%s)
+                FROM users WHERE LOWER({search_for}) = LOWER(%s)
                 """,
                     (name,)
                 )
             else:
                 cur.execute(
-                    """
-                SELECT user_id, nickname, picture
-                FROM users WHERE nickname ILIKE %s
+                    f"""
+                SELECT user_id, nickname, display_name, picture
+                FROM users WHERE {search_for} ILIKE %s
                 """,
                     (f"%{name}%",)
                 )

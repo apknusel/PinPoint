@@ -1,4 +1,3 @@
-// TODO: replace with /profile/<name>/posts
 const url = "/profile/__id__";
 const search_input = document.getElementById('searchInput');
 const search_results = document.getElementById('searchbarDropdown');
@@ -22,7 +21,7 @@ async function filterFunction() {
     console.log(err);
     return;
   }
-  
+
   search_results.innerHTML = "";
 
   if (!user_data.length) {
@@ -34,8 +33,8 @@ async function filterFunction() {
     return;
   }
 
-  for (const { user_id, nickname, picture } of user_data) {
-    const user = createElement(user_id, nickname, picture);
+  for (const { user_id, nickname, display_name, picture } of user_data) {
+    user = createElement(nickname, display_name, picture);
     search_results.append(user);
   }
 }
@@ -50,7 +49,7 @@ function createElement(userId, name, picture) {
   img.className = "user-avatar";
 
   const text = document.createElement('span');
-  text.innerText = name;
+  text.innerText = display_name;
 
   link.appendChild(img);
   link.appendChild(text);
