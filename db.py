@@ -57,9 +57,11 @@ def fetch_posts(pool):
                     p.user_id,
                     u.display_name,
                     ST_X(p.location) AS longitude,
-                    ST_Y(p.location) AS latitude
+                    ST_Y(p.location) AS latitude,
+                    m.thumbnail_data
                 FROM Posts p
                 JOIN Users u ON p.user_id = u.user_id
+                LEFT JOIN Media m ON m.post_id = p.post_id
                 WHERE p.location IS NOT NULL
                 """
             )
@@ -72,6 +74,7 @@ def fetch_posts(pool):
                 "display_name": r["display_name"],
                 "latitude": r["latitude"],
                 "longitude": r["longitude"],
+                "thumbnail": base64.b64encode(r["thumbnail_data"]).decode("utf-8") if r["thumbnail_data"] else None,
             }
             for r in rows
         ]
