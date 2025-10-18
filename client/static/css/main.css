@@ -12,16 +12,16 @@
   --dropdown-color-selected: #ddd;
 
   --follower-add-btn: #06f;
-  --follower-add-btn-hover: #3385ff; 
-  --follower-request-aptBtn-hover: #ddd;  
-  --follower-request-li-border:gray; 
+  --follower-add-btn-hover: #3385ff;
+  --follower-request-aptBtn-hover: #ddd;
+  --follower-request-li-border: gray;
   --follower-request-scroll-track: #B3B1B1;
   --follower-request-scroll-thumb: #888888;
   --follower-request-scroll-thumb-hover: #646464;
   --follower-request-scroll-thumb-active: #444444;
   --follower-view-btn: #F4F1F0;
   --follower-view-btn-hover: #ddd;
-  
+
   /* Navbar and text colors */
   --text-color: #333;
   --text-color-hover: #000;
@@ -50,7 +50,7 @@
   height: 100%;
 }
 
-.nav-grid > div {
+.nav-grid>div {
   display: flex;
   align-items: center;
   height: 100%;
@@ -115,4 +115,10 @@
 .nav-button:hover,
 .nav-login-link:hover {
   text-decoration: underline;
+}
+
+.mapboxgl-user-location-dot,
+.mapboxgl-user-location-accuracy-circle,
+.mapboxgl-user-location-heading {
+  pointer-events: none !important;
 }
