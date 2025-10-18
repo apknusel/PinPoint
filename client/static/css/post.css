@@ -1,7 +1,7 @@
 .post-div {
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
     margin: 16px;
 }
 
@@ -10,6 +10,7 @@
     align-items: center;
     padding: 12px 16px;
     border-bottom: 1px solid var(--border-color);
+    justify-content: space-between; 
 }
 
 .user-link {
@@ -139,7 +140,7 @@
     border: 1px solid var(--border-color);
     background: var(--background-white);
     border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
     padding: 12px;
     margin: 16px;
     position: sticky;
@@ -168,7 +169,7 @@
 }
 
 .recommended-info {
-  min-width: 0;
+    min-width: 0;
 }
 
 .recommended-thumb {
@@ -201,7 +202,7 @@
     border-radius: 8px;
     overflow: hidden;
     background: var(--background-white);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     z-index: 2;
     transition: width 0.3s ease, height 0.3s ease;
     will-change: width, height;
@@ -266,4 +267,74 @@
     width: 20px;
     height: 20px;
     stroke-width: 3;
+}
+
+.post-caption-textarea {
+    width: 100%;
+    overflow: hidden;
+    resize: none;
+    border: none;
+}
+
+.modify-widget {
+  display: flex;
+  gap: 2px;
+}
+
+.modify-widget button {
+  border: 1.2px solid #ccc;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  width: 30px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.post-submit {
+    background-color: #58c775;
+}
+
+.popup {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.popup .popuptext {
+  visibility: hidden;
+  width: 160px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -80px;
+}
+
+.popup .popuptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+.popup .show {
+  visibility: visible;
+  -webkit-animation: fadeIn 1s;
+  animation: fadeIn 1s;
 }
