@@ -7,7 +7,7 @@ async function initMap() {
         container: 'map',
         style: 'mapbox://styles/mapbox/standard',
         center: [center.lng, center.lat],
-        zoom: 11
+        zoom: 2
     });
     map.addControl(new mapboxgl.NavigationControl());
     map.addControl(
@@ -20,6 +20,17 @@ async function initMap() {
         })
     );
     map.addControl(new ResetControl(center, 2, 3000)); // 3 second animation for slower, smoother reset
+    
+    // Hide loading overlay once map is fully loaded
+    map.on('load', () => {
+        const overlay = document.getElementById('map-loading-overlay');
+        if (overlay) {
+            overlay.classList.add('loaded');
+            // Remove the overlay from DOM after fade-out completes
+            setTimeout(() => overlay.remove(), 500);
+        }
+    });
+    
     await loadPosts();
 }
 
@@ -33,13 +44,6 @@ async function loadPosts() {
 
         const posts = await response.json();
 
-        // If there are posts, center the map on the first one
-        if (posts.length > 0) {
-            map.flyTo({
-                center: [posts[0].longitude, posts[0].latitude],
-                zoom: 2
-            });
-        }
         // Create markers for each post
         posts.forEach(post => {
             const imageUrl = post.thumbnail 

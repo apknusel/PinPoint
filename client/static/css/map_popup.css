@@ -13,6 +13,22 @@ body {
   width: 100%;
 }
 
+/* Loading overlay to prevent white flash */
+#map-loading-overlay {
+  position: absolute;
+  top: 50px;
+  bottom: 0;
+  width: 100%;
+  background-color: #0a1929;
+  z-index: 9999;
+  pointer-events: none;
+  transition: opacity 0.5s ease-out;
+}
+
+#map-loading-overlay.loaded {
+  opacity: 0;
+}
+
 .mapboxgl-popup.airbnb-popup {
   max-width: 255px !important;
 }

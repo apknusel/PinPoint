@@ -1,5 +1,8 @@
 <!-- Mapbox GL JS -->
 <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+<style>
+body { background-color: #0a1929 !important; }
+</style>
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.css" rel="stylesheet">
 <link href="{{ url_for('static', filename='css/map_popup.css') }}" rel="stylesheet">
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.js"></script>
@@ -10,3 +13,4 @@
 <script src="{{ url_for('static', filename='js/map.js') }}"></script>
 <script src="{{ url_for('static', filename='js/reset_map_btn.js') }}"></script>
 <div id="map"></div>
+<div id="map-loading-overlay" style="position: absolute; top: 50px; bottom: 0; width: 100%; background-color: #0a1929; z-index: 9999; pointer-events: none;"></div>
