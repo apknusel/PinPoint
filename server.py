@@ -373,3 +373,34 @@ def get_request_info(followee, follower=None):
         result["followee_id"] = followee
 
     return result
+
+@app.route("/update_post/<post_id>", methods=["POST"])
+def update_post(post_id):
+    data = request.get_json()
+    caption = data.get("caption")
+    lng = data.get("lng")
+    lat = data.get("lat")
+    
+    if not caption or not lat or not lng:
+        return "Missing required fields", 400
+    try:
+        lat_f = float(lat)
+        lng_f = float(lng)
+    except ValueError:
+        return "Invalid coordinates", 400
+    
+    pool = current_app.config["DB_POOL"]
+    db.update_post(pool, post_id, caption, lng_f, lat_f )
+    return "success", 200
+
+@app.route("/delete_post/<post_id>")
+def delete_post(post_id):
+    userinfo = session["userinfo"]
+    user_id = userinfo["sub"]
+    
+    pool = current_app.config["DB_POOL"]
+
+    db.delete_post(pool, post_id)
+    return redirect(url_for('profile', user_id=user_id))
+    
+    

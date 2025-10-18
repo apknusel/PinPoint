@@ -3,6 +3,8 @@ postPage = {
   overlay: null,
   toggleBtn: null,
   marker: null,
+  isExpanded: false,
+  initialCenter: null,
 }
 
 function initPostMap() {
@@ -20,13 +22,13 @@ function initPostMap() {
 
   // Shift map center slightly north to better center the marker visually
   const centerLat = lat + 0.003; // Adjust this value to fine-tune
-  const initialCenter = [lng, centerLat];
+  postPage.initialCenter = [lng, centerLat];
   const initialZoom = 11;
 
   const map = new mapboxgl.Map({
     container: div,
     style: 'mapbox://styles/mapbox/standard',
-    center: initialCenter,
+    center: postPage.initialCenter,
     zoom: initialZoom,
     interactive: true,
     attributionControl: false
@@ -63,33 +65,34 @@ function initPostMap() {
   // Reset button functionality
   resetBtn.addEventListener('click', () => {
     map.flyTo({
-      center: initialCenter,
+      center: postPage.initialCenter,
       zoom: initialZoom,
       pitch: 0,  // Reset to birds-eye view (no tilt)
       bearing: 0,  // Reset rotation to north-up
       essential: true
     });
+    marker.setLngLat(postPage.initialCenter);
   });
 
   // Toggle expand/collapse functionality
-  let isExpanded = false;
+ postPage.isExpanded = false;
 
   toggleBtn.addEventListener('click', () => {
-    if (isExpanded) {
+    if (postPage.isExpanded) {
       // Collapse to 15%
       overlay.style.width = '15%';
       overlay.style.height = '15%';
       toggleBtn.innerHTML = '<i data-lucide="maximize"></i>';
       toggleBtn.setAttribute('aria-label', 'Expand map');
+      postPage.isExpanded = false;
     } else {
       // Expand to 50%
       overlay.style.width = '50%';
       overlay.style.height = '50%';
       toggleBtn.innerHTML = '<i data-lucide="minimize"></i>';
       toggleBtn.setAttribute('aria-label', 'Collapse map');
+      postPage.isExpanded = true;
     }
-
-    isExpanded = !isExpanded;
 
     // Re-initialize Lucide icons after changing innerHTML
     lucide.createIcons();
