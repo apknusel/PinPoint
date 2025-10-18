@@ -194,7 +194,13 @@ def post(post_id):
     post = db.fetch_single_post(pool, post_id)
     comments = db.fetch_comments(pool, post_id)
     recommended_posts = db.fetch_nearest_posts(pool, post_id, k=5)
-    return render_template("post.html", post=post, comments=comments, recommended_posts=recommended_posts)
+
+    userinfo = session.get("userinfo")
+    is_self = False
+    if (userinfo and post) and (post["user_id"] == userinfo["sub"]):
+        is_self = True
+    
+    return render_template("post.html", post=post, comments=comments, recommended_posts=recommended_posts, is_self=is_self)
 
 
 def optimize_image(file_storage, quality=80):
