@@ -1,0 +1,162 @@
+/* Airbnb-style Map Popup Styles */
+
+/* Map container layout */
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#map {
+  position: absolute;
+  top: 50px;
+  bottom: 0;
+  width: 100%;
+}
+
+/* Loading overlay to prevent white flash */
+#map-loading-overlay {
+  position: absolute;
+  top: 50px;
+  bottom: 0;
+  width: 100%;
+  background-color: #0a1929;
+  z-index: 9999;
+  pointer-events: none;
+  transition: opacity 0.5s ease-out;
+}
+
+#map-loading-overlay.loaded {
+  opacity: 0;
+}
+
+.mapboxgl-popup.airbnb-popup {
+  max-width: 255px !important;
+}
+
+.mapboxgl-popup-content {
+  padding: 0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28) !important;
+  overflow: visible !important;
+  width: 255px !important;
+}
+
+.mapboxgl-popup-close-button {
+  width: 32px;
+  height: 32px;
+  font-size: 20px;
+  line-height: 30px;
+  color: #222;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  right: 8px;
+  top: 2px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  z-index: 10;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.mapboxgl-popup-close-button:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: scale(1.05);
+}
+
+.mapboxgl-popup-close-button svg {
+  width: 18px;
+  height: 18px;
+  stroke: #222;
+  stroke-width: 2;
+}
+
+.mapboxgl-popup-tip {
+  display: none !important;
+}
+
+/* Ensure consistent sizing */
+.mapboxgl-popup-content > div {
+  max-width: 255px;
+  width: 255px;
+}
+
+/* Post card styles */
+.post-card {
+  width: 255px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.post-card-image-container {
+  width: 255px;
+  height: 180px;
+  overflow: hidden;
+  background: #f0f0f0;
+}
+
+.post-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.post-card-body {
+  padding: 12px;
+  background: white;
+}
+
+.post-card-username {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #222;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+.post-card-caption {
+  margin: 0 0 10px 0;
+  font-size: 13px;
+  font-weight: 400;
+  color: #717171;
+  line-height: 1.4;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.post-card-link {
+  display: inline-block;
+  color: #222;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  outline: none;
+}
+
+.post-card-link:focus {
+  outline: none;
+}
+
+/* Reset button styling */
+.mapboxgl-ctrl-reset {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Reset button Lucide icon styling */
+.mapboxgl-ctrl-icon svg {
+  width: 17px;
+  height: 17px;
+  stroke: #333;
+  stroke-width: 3;
+}
+

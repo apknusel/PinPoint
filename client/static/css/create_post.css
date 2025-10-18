@@ -60,3 +60,18 @@
     background: #fafafa;
     max-height: 55vh;
 }
+
+/* Reset button styling */
+.mapboxgl-ctrl-reset {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Reset button Lucide icon styling */
+.mapboxgl-ctrl-icon svg {
+    width: 17px;
+    height: 17px;
+    stroke: #333;
+    stroke-width: 3;
+}
