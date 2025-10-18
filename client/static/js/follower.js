@@ -82,9 +82,11 @@ async function requestHandler(event, action) {
         }
 
         item?.remove();
+        cleanupRequests();
     } catch (e) {
         console.log(e.message);
     }
+    
 }
 
 document.addEventListener('click', (e) => {
@@ -95,3 +97,14 @@ document.addEventListener('click', (e) => {
     const userId = entry.dataset.userId;
     if (userId) window.location.href = `/profile/${encodeURIComponent(userId)}`;
 });
+
+function cleanupRequests() {
+  const container = document.querySelector('#requestContainer');
+  if (container && container.children.length === 0) {
+    const section_title = document.querySelector('#followRequest');
+    container.remove();
+    if (section_title){
+        section_title.remove();
+    }
+  }
+}

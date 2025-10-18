@@ -1,7 +1,7 @@
 {% if followers_data.followed_by and followers_data.followed_by|rejectattr('is_accepted')|list %}
 {% if is_self %}
-<h3 class="section-title">Follow Requests</h3>
-<ul class="request-container request-list">
+<h3 id="followRequest" class="section-title">Follow Requests</h3>
+<ul id="requestContainer" class="request-container request-list">
     {% for follower in followers_data.followed_by %}
     {% if not follower['is_accepted']%}
     <li class="request-li">
