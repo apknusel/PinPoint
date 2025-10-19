@@ -44,16 +44,10 @@ async function loadPosts() {
 
         const posts = await response.json();
 
-        // Group posts by nearby coordinates using quantization to avoid precision issues
-        function quantizeCoord(lat, lng, precision = 4) {
-            const qLat = Number(parseFloat(lat).toFixed(precision));
-            const qLng = Number(parseFloat(lng).toFixed(precision));
-            return `${qLat},${qLng}`;
-        }
-
+        // Group posts by exact DB coordinates
         const coordToPosts = {};
         posts.forEach((post) => {
-            const key = quantizeCoord(post.latitude, post.longitude);
+            const key = `${post.latitude},${post.longitude}`;
             if (!coordToPosts[key]) coordToPosts[key] = [];
             coordToPosts[key].push(post);
         });
@@ -82,24 +76,12 @@ async function loadPosts() {
             return node;
         }
 
-        // Haversine distance helper (meters)
-        function distanceMeters(lat1, lng1, lat2, lng2) {
-            const toRad = (d) => d * Math.PI / 180;
-            const R = 6371000;
-            const dLat = toRad(lat2 - lat1);
-            const dLng = toRad(lng2 - lng1);
-            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-                      Math.sin(dLng / 2) * Math.sin(dLng / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c;
-        }
+        // Distance helper not needed when grouping by exact DB coordinates
 
         // Create one marker per coordinate group
         Object.keys(coordToPosts).forEach((key) => {
-            const seedGroup = coordToPosts[key];
-            const first = seedGroup[0];
-            const initialTotal = seedGroup.length;
+            const group = coordToPosts[key];
+            const first = group[0];
             let currentIndex = 0;
 
             const popup = new mapboxgl.Popup({
@@ -132,10 +114,8 @@ async function loadPosts() {
                     });
                 });
 
-                // Compute dynamic nearby group at open-time to avoid losing items due to precision/zoom
-                const NEARBY_RADIUS_M = 30; // tweak as needed
-                const dynamicGroup = posts.filter((p) => distanceMeters(first.latitude, first.longitude, p.latitude, p.longitude) <= NEARBY_RADIUS_M);
-                const total = dynamicGroup.length;
+                // Use pre-grouped posts at this exact coordinate
+                const total = group.length;
                 // Hide overlay controls if only a single post is nearby
                 const overlayEl = root.querySelector('.post-card-image-overlay');
                 if (overlayEl && total <= 1) {
@@ -161,11 +141,16 @@ async function loadPosts() {
 
                 let prevBtn = root.querySelector('.post-card-prev');
                 let nextBtn = root.querySelector('.post-card-next');
+                // If only one post, no nav to wire; finalize icons and exit
+                if (total <= 1) {
+                    lucide.createIcons();
+                    return;
+                }
                 prevBtn = resetButton(prevBtn);
                 nextBtn = resetButton(nextBtn);
 
                 function render(direction) {
-                    const post = dynamicGroup[currentIndex];
+                    const post = group[currentIndex];
                     const imageUrl = post.thumbnail
                         ? `data:image/jpeg;base64,${post.thumbnail}`
                         : 'https://via.placeholder.com/255x180/f0f0f0/999999?text=No+Image';
