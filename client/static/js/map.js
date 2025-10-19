@@ -44,43 +44,207 @@ async function loadPosts() {
 
         const posts = await response.json();
 
-        // Create markers for each post
-        posts.forEach(post => {
-            const imageUrl = post.thumbnail 
+        // Group posts by stable key from server when present; fallback to exact lat/lng
+        const coordToPosts = {};
+        posts.forEach((post) => {
+            const key = post.location_key || `${post.latitude},${post.longitude}`;
+            if (!coordToPosts[key]) coordToPosts[key] = [];
+            coordToPosts[key].push(post);
+        });
+
+        function buildPopupNode(post) {
+            const template = document.getElementById('map-post-card-template');
+            if (!template) return null;
+            const node = template.content.firstElementChild.cloneNode(true);
+
+            const currentImgEl = node.querySelector('.post-card-image-current');
+            const usernameEl = node.querySelector('.post-card-username');
+            const captionEl = node.querySelector('.post-card-caption');
+            const linkEl = node.querySelector('.post-card-link');
+
+            const imageUrl = post.thumbnail
                 ? `data:image/jpeg;base64,${post.thumbnail}`
                 : 'https://via.placeholder.com/255x180/f0f0f0/999999?text=No+Image';
-            
-            const popup = new mapboxgl.Popup({ 
+            if (currentImgEl) {
+                currentImgEl.src = imageUrl;
+                currentImgEl.alt = escapeHtml(post.caption);
+            }
+            if (usernameEl) usernameEl.textContent = escapeHtml(post.display_name);
+            if (captionEl) captionEl.textContent = escapeHtml(post.caption);
+            if (linkEl) linkEl.href = `/post/${post.post_id}`;
+
+            return node;
+        }
+
+        // Create one marker per coordinate group
+        Object.keys(coordToPosts).forEach((key) => {
+            const group = coordToPosts[key];
+            const first = group[0];
+            let currentIndex = 0;
+
+            const popup = new mapboxgl.Popup({
                 offset: 50,
                 maxWidth: '255px',
                 className: 'airbnb-popup',
                 anchor: 'bottom',
                 closeButton: true
-            })
-                .setHTML(`
-                <div class="post-card">
-                    <div class="post-card-image-container">
-                        <img src="${imageUrl}" alt="${escapeHtml(post.caption)}" class="post-card-image" />
-                    </div>
-                    <div class="post-card-body">
-                        <h3 class="post-card-username">${escapeHtml(post.display_name)}</h3>
-                        <p class="post-card-caption">${escapeHtml(post.caption)}</p>
-                        <a href="/post/${post.post_id}" class="post-card-link">View Post →</a>
-                    </div>
-                </div>
-            `);
-            
-            // Replace close button with Lucide icon when popup opens
+            });
+            // Set content using DOM node
+            const contentNode = buildPopupNode(first);
+            if (contentNode) popup.setDOMContent(contentNode);
+
             popup.on('open', () => {
-                const closeButton = document.querySelector('.mapboxgl-popup-close-button');
+                const root = popup.getElement();
+                if (!root) return;
+
+                // Replace close button icon (scoped)
+                const closeButton = root.querySelector('.mapboxgl-popup-close-button');
                 if (closeButton) {
                     closeButton.innerHTML = '<i data-lucide="x"></i>';
-                    lucide.createIcons();
                 }
+
+                // Center map exactly on the marker (no vertical offset)
+                requestAnimationFrame(() => {
+                    map.easeTo({
+                        center: [first.longitude, first.latitude],
+                        duration: 500,
+                        essential: true
+                    });
+                });
+
+                // Use pre-grouped posts at this exact coordinate
+                const total = group.length;
+                // Hide overlay controls if only a single post is nearby
+                const overlayEl = root.querySelector('.post-card-image-overlay');
+                if (overlayEl && total <= 1) {
+                    overlayEl.style.display = 'none';
+                }
+
+                // If multiple, wire navigation and hover overlays
+                const imageContainer = root.querySelector('.post-card-image-container');
+                const stageEl = root.querySelector('.post-card-image-stage');
+                const currentImgEl = root.querySelector('.post-card-image-current');
+                const bufferImgEl = root.querySelector('.post-card-image-buffer');
+                if (bufferImgEl) bufferImgEl.style.display = 'none'; // avoid broken image icon when idle
+                const usernameEl = root.querySelector('.post-card-username');
+                const captionEl = root.querySelector('.post-card-caption');
+                const linkEl = root.querySelector('.post-card-link');
+                // Get buttons and strip any prior listeners by cloning
+                function resetButton(btn) {
+                    if (!btn) return btn;
+                    const clone = btn.cloneNode(true);
+                    btn.replaceWith(clone);
+                    return clone;
+                }
+
+                let prevBtn = root.querySelector('.post-card-prev');
+                let nextBtn = root.querySelector('.post-card-next');
+                // If only one post, no nav to wire; finalize icons and exit
+                if (total <= 1) {
+                    lucide.createIcons();
+                    return;
+                }
+                prevBtn = resetButton(prevBtn);
+                nextBtn = resetButton(nextBtn);
+
+                function render(direction) {
+                    const post = group[currentIndex];
+                    const imageUrl = post.thumbnail
+                        ? `data:image/jpeg;base64,${post.thumbnail}`
+                        : 'https://via.placeholder.com/255x180/f0f0f0/999999?text=No+Image';
+                    // Update text/link immediately
+                    usernameEl.textContent = escapeHtml(post.display_name);
+                    captionEl.textContent = escapeHtml(post.caption);
+                    linkEl.href = `/post/${post.post_id}`;
+                    
+                    // If we have a stage and both images, animate slide; else simple swap
+                    if (stageEl && currentImgEl && bufferImgEl && direction) {
+                        const fromRight = direction === 'next';
+                        bufferImgEl.src = imageUrl;
+                        bufferImgEl.alt = escapeHtml(post.caption);
+                        // Prepare positions without transition
+                        currentImgEl.style.transition = 'none';
+                        bufferImgEl.style.transition = 'none';
+                        bufferImgEl.style.display = 'block';
+                        bufferImgEl.style.transform = fromRight ? 'translateX(100%)' : 'translateX(-100%)';
+                        currentImgEl.style.transform = 'translateX(0)';
+
+                        // Next frame: animate to target positions
+                        requestAnimationFrame(() => {
+                            currentImgEl.style.transition = 'transform 250ms ease';
+                            bufferImgEl.style.transition = 'transform 250ms ease';
+                            currentImgEl.style.transform = fromRight ? 'translateX(-100%)' : 'translateX(100%)';
+                            bufferImgEl.style.transform = 'translateX(0)';
+                        });
+
+                        const onDone = () => {
+                            currentImgEl.removeEventListener('transitionend', onDone);
+                            // Make buffer the current image content
+                            currentImgEl.style.transition = 'none';
+                            bufferImgEl.style.transition = 'none';
+                            currentImgEl.src = bufferImgEl.src;
+                            currentImgEl.alt = bufferImgEl.alt;
+                            // Reset transforms
+                            currentImgEl.style.transform = 'translateX(0)';
+                            bufferImgEl.style.transform = 'translateX(0)';
+                            bufferImgEl.style.display = 'none';
+                        };
+                        currentImgEl.addEventListener('transitionend', onDone, { once: true });
+                    } else if (currentImgEl) {
+                        // Fallback: no animation
+                        currentImgEl.src = imageUrl;
+                        currentImgEl.alt = escapeHtml(post.caption);
+                    }
+                    // Toggle visibility of back button based on index
+                    if (imageContainer) {
+                        if (currentIndex === 0) {
+                            imageContainer.classList.remove('has-prev');
+                        } else {
+                            imageContainer.classList.add('has-prev');
+                        }
+                    }
+                    // Toggle visibility of next button based on index
+                    if (nextBtn) {
+                        if (currentIndex >= total - 1) {
+                            nextBtn.style.display = 'none';
+                        } else {
+                            nextBtn.style.display = '';
+                        }
+                    }
+                }
+
+                if (nextBtn && prevBtn && imageContainer) {
+                    // Ensure back button hidden initially
+                    imageContainer.classList.remove('has-prev');
+
+                    nextBtn.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (total > 1 && currentIndex < total - 1) {
+                            currentIndex += 1;
+                            render('next');
+                        }
+                    };
+
+                    prevBtn.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (total > 1 && currentIndex > 0) {
+                            currentIndex -= 1;
+                            render('prev');
+                        }
+                    };
+
+                    // Initialize state on open
+                    render();
+                }
+
+                // Initialize Lucide icons once content is in DOM
+                lucide.createIcons();
             });
-            
-            const marker = new mapboxgl.Marker()
-                .setLngLat([post.longitude, post.latitude])
+
+            new mapboxgl.Marker()
+                .setLngLat([first.longitude, first.latitude])
                 .setPopup(popup)
                 .addTo(map);
         });
