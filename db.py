@@ -58,6 +58,7 @@ def fetch_posts(pool):
                     u.display_name,
                     ST_X(p.location) AS longitude,
                     ST_Y(p.location) AS latitude,
+                    encode(ST_AsEWKB(p.location), 'hex') AS location_key,
                     m.thumbnail_data
                 FROM Posts p
                 JOIN Users u ON p.user_id = u.user_id
@@ -74,6 +75,7 @@ def fetch_posts(pool):
                 "display_name": r["display_name"],
                 "latitude": r["latitude"],
                 "longitude": r["longitude"],
+                    "location_key": r["location_key"],
                 "thumbnail": base64.b64encode(r["thumbnail_data"]).decode("utf-8") if r["thumbnail_data"] else None,
             }
             for r in rows

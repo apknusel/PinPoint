@@ -44,10 +44,10 @@ async function loadPosts() {
 
         const posts = await response.json();
 
-        // Group posts by exact DB coordinates
+        // Group posts by stable key from server when present; fallback to exact lat/lng
         const coordToPosts = {};
         posts.forEach((post) => {
-            const key = `${post.latitude},${post.longitude}`;
+            const key = post.location_key || `${post.latitude},${post.longitude}`;
             if (!coordToPosts[key]) coordToPosts[key] = [];
             coordToPosts[key].push(post);
         });
@@ -75,8 +75,6 @@ async function loadPosts() {
 
             return node;
         }
-
-        // Distance helper not needed when grouping by exact DB coordinates
 
         // Create one marker per coordinate group
         Object.keys(coordToPosts).forEach((key) => {
