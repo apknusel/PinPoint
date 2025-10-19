@@ -1,4 +1,4 @@
-{% if not is_self and current_user %}
+{% if not is_self and is_logged_in %}
 {% set is_disabled = relation in ["pending", "following"] %}
 <button id="addFollower" class="btn btn-follow" type="button" {% if is_disabled %}disabled{% endif %}
     onclick="requestFollowing()">

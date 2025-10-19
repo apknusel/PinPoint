@@ -290,6 +290,8 @@ def profile(user_id):
             if follower_by['follower_id'] == userinfo['sub']:
                 relation = "pending" if not follower_by['is_accepted'] else "following"
                 break
+            
+    is_logged_in = True if userinfo else False
 
     return render_template("profile.html",
                            username=user_id,
@@ -299,6 +301,7 @@ def profile(user_id):
                            relation=relation,
                            profile_picture=profile_picture,
                            posts=posts,
+                           is_logged_in=is_logged_in,
                            can_view_profile=can_view_profile)
 
 @app.route("/settings")
