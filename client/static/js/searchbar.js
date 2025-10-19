@@ -33,7 +33,7 @@ async function filterFunction() {
     return;
   }
 
-  for (const { display_name, nickname, picture, user_id } of user_data) {
+  for (const { display_name, picture, user_id } of user_data) {
     user = createElement(user_id, display_name, picture);
     search_results.append(user);
   }

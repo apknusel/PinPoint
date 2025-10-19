@@ -37,7 +37,7 @@ async function initProfileMap() {
 
 async function loadPosts(profileUserId) {
     try {
-        const response = await fetch(`/api/posts/by-user/${encodeURIComponent(profileUserId)}`);
+        const response = await fetch(`/api/posts/${encodeURIComponent(profileUserId)}`);
         if (!response.ok) {
             console.error('Failed to fetch posts');
             return;
