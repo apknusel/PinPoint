@@ -14,7 +14,10 @@
                    name="display_name" 
                    value="{{ display_name }}" 
                    class="pure-input-1"
-                   maxlength="50">
+                   maxlength="13"
+                   minlength="3"
+                   pattern="[A-Za-z]+( [A-Za-z]+)*"
+                   />
             <span class="pure-form-message">This is how other users see you.</span>
             
             <label for="privacy_settings">Current Privacy Settings</label>
