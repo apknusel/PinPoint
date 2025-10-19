@@ -53,9 +53,10 @@ window.addEventListener("DOMContentLoaded", () => {
                                     <polygon points="14 2 18 6 7 17 3 17 3 13 14 2"></polygon> <line x1="3" y1="22" x2="21" y2="22"></line>
                                     </svg>`
 
-                    is_editing = false;
+            is_editing = false;
                     postPage.isExpanded = false;
                     postPage.initialCenter = [lng, lat];
+            if (postPage.disableEditingInteractions) postPage.disableEditingInteractions();
                     lucide.createIcons();
 
                 } else {
@@ -85,6 +86,23 @@ window.addEventListener("DOMContentLoaded", () => {
 
             is_editing = true;
             postPage.isExpanded = true;
+            // Ensure POIs are visible and easy to click while editing
+            try {
+                const targetZoom = 14;
+                const { lng, lat } = marker.getLngLat();
+                // Center the map exactly on the current marker position when entering edit
+                const centerNow = () => map.easeTo({ center: [lng, lat], zoom: Math.max(map.getZoom(), targetZoom) });
+                let centered = false;
+                const onResize = () => {
+                    if (centered) return;
+                    centered = true;
+                    requestAnimationFrame(centerNow);
+                };
+                // If the overlay resize triggers a map.resize, wait for it; otherwise center next frame
+                map.once && map.once('resize', onResize);
+                requestAnimationFrame(() => { if (!centered) centerNow(); });
+                if (postPage.enableEditingInteractions) postPage.enableEditingInteractions();
+            } catch (e) {}
             lucide.createIcons();
         }
     }
