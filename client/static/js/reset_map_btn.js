@@ -1,9 +1,10 @@
 
 class ResetControl {
-     constructor(center, zoom = 2, duration = null) {
+     constructor(center, zoom = 2, duration = null, bounds = null) {
         this.center = center; 
         this.zoom = zoom;
         this.duration = duration;
+        this.bounds = bounds; // optional: if provided, use fitBounds instead of flyTo
     }
 
     onAdd(map) {
@@ -25,22 +26,27 @@ class ResetControl {
                     popup.remove();
                 }
             }
-            
+
             // Reset map view
-            const flyToOptions = {
-                center: [this.center.lng, this.center.lat],
-                zoom: this.zoom,
-                pitch: 0,  // Reset to birds-eye view (no tilt)
-                bearing: 0,  // Reset rotation to north-up
-                essential: true
-            };
-            
-            // Add duration if specified
-            if (this.duration !== null) {
-                flyToOptions.duration = this.duration;
+            if (this.bounds) {
+                const fitOptions = {
+                    padding: 50,
+                    maxZoom: typeof this.zoom === 'number' ? this.zoom : 12,
+                    essential: true
+                };
+                if (this.duration !== null) fitOptions.duration = this.duration;
+                map.fitBounds(this.bounds, fitOptions);
+            } else {
+                const flyToOptions = {
+                    center: [this.center.lng, this.center.lat],
+                    zoom: this.zoom,
+                    pitch: 0,
+                    bearing: 0,
+                    essential: true
+                };
+                if (this.duration !== null) flyToOptions.duration = this.duration;
+                map.flyTo(flyToOptions);
             }
-            
-            map.flyTo(flyToOptions);
         };
         container.appendChild(button);
         

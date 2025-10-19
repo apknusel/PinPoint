@@ -467,7 +467,7 @@ def fetch_posts_by_user_id(pool, user_id):
     try:
         with conn.cursor(cursor_factory=DictCursor) as cur:
             cur.execute(
-                """
+            """
                 SELECT 
                     p.post_id,
                     p.caption,
@@ -475,7 +475,8 @@ def fetch_posts_by_user_id(pool, user_id):
                     u.nickname,
                     u.display_name,
                     ST_X(p.location) AS longitude,
-                    ST_Y(p.location) AS latitude
+                    ST_Y(p.location) AS latitude,
+                    encode(ST_AsEWKB(p.location), 'hex') AS location_key
                 FROM Posts p
                 JOIN Users u ON p.user_id = u.user_id
                 WHERE p.location IS NOT NULL AND u.user_id = %s
@@ -492,6 +493,7 @@ def fetch_posts_by_user_id(pool, user_id):
                 "display_name": r["display_name"],
                 "latitude": r["latitude"],
                 "longitude": r["longitude"],
+                "location_key": r["location_key"],
             }
             for r in rows
         ]
