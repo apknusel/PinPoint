@@ -3,7 +3,6 @@ CREATE EXTENSION postgis;
 CREATE TABLE Users (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   user_id TEXT PRIMARY KEY,
-  nickname TEXT NOT NULL,
   email TEXT NOT NULL,
   picture TEXT NOT NULL,
   display_name TEXT,

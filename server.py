@@ -59,10 +59,9 @@ def ensure_logged_in_user():
         return None
     pool = current_app.config["DB_POOL"]
     user_id = userinfo.get("sub")
-    nickname = userinfo.get("nickname") or None
     email = userinfo.get("email") or None
     picture = userinfo.get("picture") or None    
-    db.upsert_user(pool, user_id, nickname, email, picture)
+    db.upsert_user(pool, user_id, email, picture)
     return user_id
 
 
@@ -117,8 +116,8 @@ def callback():
     session["user"] = token
     
     pool = current_app.config["DB_POOL"]
-    nickname = userinfo.get("nickname")
-    profile_data = db.check_profile_complete(pool, nickname)
+    user_id = userinfo.get("sub")
+    profile_data = db.check_profile_complete(pool, user_id)
 
     session.update(profile_data)
 
@@ -157,24 +156,22 @@ def complete_profile():
 @app.route("/api/posts")
 def get_posts():
     pool = current_app.config["DB_POOL"]
-    return jsonify(db.fetch_posts(pool))
+    userinfo = session.get("userinfo")
+    viewer_id = userinfo.get("sub") if userinfo else None
+    return jsonify(db.fetch_posts(pool, viewer_id))
 
-@app.route("/api/posts/<username>")
-def get_posts_by_username(username):
-    pool = current_app.config["DB_POOL"]
-    return jsonify(db.fetch_posts_by_username(pool, username))
-
-@app.route("/api/posts/by-user/<user_id>")
+@app.route("/api/posts/<user_id>")
 def get_posts_by_user_id(user_id):
     pool = current_app.config["DB_POOL"]
-    return jsonify(db.fetch_posts_by_user_id(pool, user_id))
+    userinfo = session.get("userinfo")
+    viewer_id = userinfo.get("sub") if userinfo else None
+    return jsonify(db.fetch_posts_by_user_id(pool, user_id, viewer_id))
 
 @app.route("/api/<post_id>/comment", methods=["POST"])
 @requires_auth
 def add_comment(post_id):
     user_id = ensure_logged_in_user()
     comment = request.form.get("comment", "").strip()
-    # comment is empty
     if not comment:
         return redirect(url_for("post", post_id=post_id))
     pool = current_app.config["DB_POOL"]
@@ -191,11 +188,16 @@ def index():
 @app.route("/post/<post_id>")
 def post(post_id):
     pool = current_app.config["DB_POOL"]
-    post = db.fetch_single_post(pool, post_id)
+    userinfo = session.get("userinfo")
+    viewer_id = userinfo.get("sub") if userinfo else None
+
+    post = db.fetch_single_post(pool, post_id, viewer_id)
+    if not post:
+        return redirect(url_for("index"))
+
     comments = db.fetch_comments(pool, post_id)
     recommended_posts = db.fetch_nearest_posts(pool, post_id, k=5)
 
-    userinfo = session.get("userinfo")
     is_self = False
     if (userinfo and post) and (post["user_id"] == userinfo["sub"]):
         is_self = True
@@ -270,31 +272,34 @@ def profile(user_id):
     if not profile_user:
         return redirect(url_for("index"))
 
+    viewer_id = userinfo.get('sub') if userinfo else None
+
     followers_data = db.fetch_followers(pool, user_id)
     display_name = profile_user.get('display_name')
     profile_picture = db.fetch_user_profile_image_by_user_id(pool, user_id)
-    posts = db.fetch_users_post_images_by_user_id(pool, user_id)
-    relation = None
-    is_self = False
-    current_user = False
 
+    can_view_profile = db.can_view_user(pool, user_id, viewer_id)
+    is_self = (userinfo and (userinfo.get('sub') == user_id))
+    posts = None
+    if can_view_profile or is_self:
+        posts = db.fetch_users_post_images_by_user_id(pool, user_id, viewer_id)
+
+    relation = None
     if userinfo:
         for follower_by in followers_data['followed_by']:
             if follower_by['follower_id'] == userinfo['sub']:
                 relation = "pending" if not follower_by['is_accepted'] else "following"
                 break
-        current_user = userinfo.get('nickname')
-        is_self = (userinfo.get('sub') == user_id)
 
     return render_template("profile.html",
                            username=user_id,
                            display_name=display_name,
                            is_self=is_self,
-                           current_user=current_user,
                            followers_data=followers_data,
                            relation=relation,
                            profile_picture=profile_picture,
-                           posts=posts)
+                           posts=posts,
+                           can_view_profile=can_view_profile)
 
 @app.route("/settings")
 @requires_auth
@@ -330,7 +335,7 @@ def handle_update_profile_settings():
 def search():
     name = request.args.get('name')
     pool = current_app.config["DB_POOL"]
-    matching_users = db.fetch_users(pool, name, search_for="display_name")
+    matching_users = db.fetch_users(pool, name)
     return jsonify(matching_users)
 
 @app.route("/follower_request_create", methods=['POST'])
@@ -402,5 +407,3 @@ def delete_post(post_id):
 
     db.delete_post(pool, post_id)
     return redirect(url_for('profile', user_id=user_id))
-    
-    

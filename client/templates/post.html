@@ -20,7 +20,7 @@
 <div class="post-div">
   <div class="post-header">
     <a href="{{ url_for('profile', user_id=post.user_id) }}" class="user-link">
-      <img class="post-avatar" src="{{ post.picture }}" alt="{{ post.nickname }} profile">
+      <img class="post-avatar" src="{{ post.picture }}" alt="{{ post.display_name }} profile">
       <div class="post-user">
         <span class="post-username">{{ post.display_name }}</span>
         <span class="post-subtitle">View profile</span>

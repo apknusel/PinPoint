@@ -5,31 +5,30 @@ import base64
 def init_pool(dsn, minconn=1, maxconn=100):
     return ThreadedConnectionPool(minconn, maxconn, dsn=dsn, sslmode="require")
 
-def upsert_user(pool, user_id, nickname, email, picture):
+def upsert_user(pool, user_id, email, picture):
     conn = pool.getconn()
     try:
         with conn.cursor(cursor_factory=DictCursor) as cur:
             cur.execute(
                 """
-                INSERT INTO Users (user_id, nickname, email, picture)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO Users (user_id, email, picture)
+                VALUES (%s, %s, %s)
                 ON CONFLICT (user_id) DO UPDATE
-                  SET nickname = EXCLUDED.nickname,
-                      email = EXCLUDED.email
+                  SET email = EXCLUDED.email
                 """,
-                (user_id, nickname, email, picture),
+                (user_id, email, picture),
             )
         conn.commit()
     finally:
         pool.putconn(conn)
 
-def check_profile_complete(pool, nickname):
+def check_profile_complete(pool, user_id):
     conn = pool.getconn()
     try:
         with conn.cursor(cursor_factory=DictCursor) as cur:
             cur.execute(
-                "SELECT display_name, public FROM Users WHERE nickname = %s",
-                (nickname,)
+                "SELECT display_name, public FROM Users WHERE user_id = %s",
+                (user_id,)
             )
             result = cur.fetchone()
             if result and result['display_name']:
@@ -45,7 +44,7 @@ def check_profile_complete(pool, nickname):
     finally:
         pool.putconn(conn)
 
-def fetch_posts(pool):
+def fetch_posts(pool, viewer_id=None):
     conn = pool.getconn()
     try:
         with conn.cursor(cursor_factory=DictCursor) as cur:
@@ -64,7 +63,19 @@ def fetch_posts(pool):
                 JOIN Users u ON p.user_id = u.user_id
                 LEFT JOIN Media m ON m.post_id = p.post_id
                 WHERE p.location IS NOT NULL
-                """
+                  AND (
+                        u.public = TRUE
+                        OR %s = p.user_id
+                        OR EXISTS (
+                            SELECT 1
+                            FROM Followers f
+                            WHERE f.followee_id = p.user_id
+                              AND f.follower_id = %s
+                              AND f.is_accepted = TRUE
+                        )
+                  )
+                """,
+                (viewer_id, viewer_id),
             )
             rows = cur.fetchall()
         return [
@@ -75,7 +86,7 @@ def fetch_posts(pool):
                 "display_name": r["display_name"],
                 "latitude": r["latitude"],
                 "longitude": r["longitude"],
-                    "location_key": r["location_key"],
+                "location_key": r["location_key"],
                 "thumbnail": base64.b64encode(r["thumbnail_data"]).decode("utf-8") if r["thumbnail_data"] else None,
             }
             for r in rows
@@ -83,7 +94,7 @@ def fetch_posts(pool):
     finally:
         pool.putconn(conn)
 
-def fetch_posts_by_username(pool, username):
+def fetch_posts_by_username(pool, username, viewer_id=None):
     conn = pool.getconn()
     try:
         with conn.cursor(cursor_factory=DictCursor) as cur:
@@ -93,14 +104,26 @@ def fetch_posts_by_username(pool, username):
                     p.post_id,
                     p.caption,
                     p.user_id,
-                    u.nickname,
+                    u.display_name,
                     ST_X(p.location) AS longitude,
                     ST_Y(p.location) AS latitude
                 FROM Posts p
                 JOIN Users u ON p.user_id = u.user_id
-                WHERE p.location IS NOT NULL AND u.nickname = %s
+                WHERE p.location IS NOT NULL 
+                  AND u.display_name = %s
+                  AND (
+                        u.public = TRUE
+                        OR %s = p.user_id
+                        OR EXISTS (
+                            SELECT 1
+                            FROM Followers f
+                            WHERE f.followee_id = p.user_id
+                              AND f.follower_id = %s
+                              AND f.is_accepted = TRUE
+                        )
+                  )
                 """,
-                (username,)
+                (username, viewer_id, viewer_id),
             )
             rows = cur.fetchall()
         return [
@@ -108,7 +131,7 @@ def fetch_posts_by_username(pool, username):
                 "post_id": r["post_id"],
                 "caption": r["caption"],
                 "user_id": r["user_id"],
-                "nickname": r["nickname"],
+                "display_name": r["display_name"],
                 "latitude": r["latitude"],
                 "longitude": r["longitude"],
             }
@@ -139,7 +162,7 @@ def insert_post_with_media(pool, post_id, caption, user_id, lng, lat, media_id, 
     finally:
         pool.putconn(conn)
 
-def fetch_single_post(pool, post_id):
+def fetch_single_post(pool, post_id, viewer_id=None):
     conn = pool.getconn()
     try:
         with conn.cursor(cursor_factory=DictCursor) as cur:
@@ -148,7 +171,6 @@ def fetch_single_post(pool, post_id):
                 SELECT p.post_id,
                        p.caption,
                        p.user_id,
-                       u.nickname,
                        u.display_name,
                        u.picture,
                        ST_X(p.location) AS longitude,
@@ -159,8 +181,19 @@ def fetch_single_post(pool, post_id):
                 JOIN Users u ON p.user_id = u.user_id
                 LEFT JOIN Media m ON m.post_id = p.post_id
                 WHERE p.post_id = %s
+                  AND (
+                        u.public = TRUE
+                        OR %s = p.user_id
+                        OR EXISTS (
+                            SELECT 1
+                            FROM Followers f
+                            WHERE f.followee_id = p.user_id
+                              AND f.follower_id = %s
+                              AND f.is_accepted = TRUE
+                        )
+                  )
                 """,
-                (post_id,)
+                (post_id, viewer_id, viewer_id),
             )
             row = cur.fetchone()
             if not row:
@@ -169,59 +202,12 @@ def fetch_single_post(pool, post_id):
                 "post_id": row["post_id"],
                 "caption": row["caption"],
                 "user_id": row["user_id"],
-                "nickname": row["nickname"],
                 "display_name": row["display_name"],
                 "picture": row["picture"],
                 "latitude": row["latitude"],
                 "longitude": row["longitude"],
                 "image_data": base64.b64encode(row["file_data"]).decode("utf-8")
             }
-    finally:
-        pool.putconn(conn)
-
-def fetch_user_profile_image(pool, nickname):
-    conn = pool.getconn()
-    try:
-        with conn.cursor(cursor_factory=DictCursor) as cur:
-            cur.execute(
-                """
-                SELECT u.picture
-                FROM Users u
-                WHERE u.nickname = %s
-                """,
-                (nickname,)
-            )
-            row = cur.fetchone()
-            if not row:
-                return None
-            return { "picture": row["picture"] }
-    finally:
-        pool.putconn(conn)
-
-def fetch_users_post_images(pool, nickname):
-    conn = pool.getconn()
-    try:
-        with conn.cursor(cursor_factory=DictCursor) as cur:
-            cur.execute(
-                """
-                SELECT p.post_id,
-                       m.thumbnail_data
-                FROM Users u
-                JOIN Posts p ON p.user_id = u.user_id
-                LEFT JOIN Media m ON m.post_id = p.post_id
-                WHERE u.nickname = %s
-                ORDER BY p.created_at DESC
-                """,
-                (nickname,)
-            )
-            rows = cur.fetchall()
-        return [
-            {
-                "post_id": r["post_id"],
-                "image_data": base64.b64encode(r["thumbnail_data"]).decode("utf-8")
-            }
-            for r in rows
-        ]
     finally:
         pool.putconn(conn)
 
@@ -273,24 +259,24 @@ def fetch_comments(pool, post_id):
     finally:
         pool.putconn(conn)
 
-def fetch_users(pool, name, exact_match=False, search_for="nickname"):
+def fetch_users(pool, name, exact_match=False):
     conn = pool.getconn()
     try:
         with conn.cursor(cursor_factory=DictCursor) as cur:
             if (exact_match):
                 cur.execute(
-                    f"""
-                SELECT user_id, nickname, display_name, picture 
-                FROM users WHERE LOWER({search_for}) = LOWER(%s)
-                """,
+                    """
+                    SELECT user_id, display_name, picture 
+                    FROM users WHERE LOWER(display_name) = LOWER(%s)
+                    """,
                     (name,)
                 )
             else:
                 cur.execute(
-                    f"""
-                SELECT user_id, nickname, display_name, picture
-                FROM users WHERE {search_for} ILIKE %s
-                """,
+                    """
+                    SELECT user_id, display_name, picture
+                    FROM users WHERE display_name ILIKE %s
+                    """,
                     (f"%{name}%",)
                 )
 
@@ -337,7 +323,7 @@ def update_profile_settings(pool, user_id, display_name, privacy_settings):
     finally:
         pool.putconn(conn)
 
-def fetch_nearest_posts(pool, post_id, k=5):
+def fetch_nearest_posts(pool, post_id, viewer_id=None, k=5):
     conn = pool.getconn()
     try:
         with conn.cursor(cursor_factory=DictCursor) as cur:
@@ -355,10 +341,21 @@ def fetch_nearest_posts(pool, post_id, k=5):
                 WHERE p1.post_id = %s
                   AND p1.location IS NOT NULL
                   AND p2.location IS NOT NULL
+                  AND (
+                        u.public = TRUE
+                        OR %s = p2.user_id
+                        OR EXISTS (
+                            SELECT 1
+                            FROM Followers f
+                            WHERE f.followee_id = p2.user_id
+                              AND f.follower_id = %s
+                              AND f.is_accepted = TRUE
+                        )
+                  )
                 ORDER BY p2.location <-> p1.location
                 LIMIT %s
                 """,
-                (post_id, k),
+                (post_id, viewer_id, viewer_id, k),
             )
             rows = cur.fetchall()
             return [
@@ -462,7 +459,7 @@ def handle_follow_request(pool, follower_id , followee_id, accept=False):
     finally:
         pool.putconn(conn)
 
-def fetch_posts_by_user_id(pool, user_id):
+def fetch_posts_by_user_id(pool, user_id, viewer_id=None):
     conn = pool.getconn()
     try:
         with conn.cursor(cursor_factory=DictCursor) as cur:
@@ -472,15 +469,26 @@ def fetch_posts_by_user_id(pool, user_id):
                     p.post_id,
                     p.caption,
                     p.user_id,
-                    u.nickname,
                     u.display_name,
                     ST_X(p.location) AS longitude,
                     ST_Y(p.location) AS latitude
                 FROM Posts p
                 JOIN Users u ON p.user_id = u.user_id
-                WHERE p.location IS NOT NULL AND u.user_id = %s
+                WHERE p.location IS NOT NULL 
+                  AND u.user_id = %s
+                  AND (
+                        u.public = TRUE
+                        OR %s = u.user_id
+                        OR EXISTS (
+                            SELECT 1
+                            FROM Followers f
+                            WHERE f.followee_id = u.user_id
+                              AND f.follower_id = %s
+                              AND f.is_accepted = TRUE
+                        )
+                  )
                 """,
-                (user_id,)
+                (user_id, viewer_id, viewer_id),
             )
             rows = cur.fetchall()
         return [
@@ -488,7 +496,6 @@ def fetch_posts_by_user_id(pool, user_id):
                 "post_id": r["post_id"],
                 "caption": r["caption"],
                 "user_id": r["user_id"],
-                "nickname": r["nickname"],
                 "display_name": r["display_name"],
                 "latitude": r["latitude"],
                 "longitude": r["longitude"],
@@ -504,7 +511,7 @@ def fetch_user_by_id(pool, user_id):
         with conn.cursor(cursor_factory=DictCursor) as cur:
             cur.execute(
                 """
-                SELECT user_id, nickname, email, picture, display_name, public
+                SELECT user_id, email, picture, display_name, public
                 FROM users
                 WHERE user_id = %s
                 """,
@@ -534,7 +541,7 @@ def fetch_user_profile_image_by_user_id(pool, user_id):
     finally:
         pool.putconn(conn)
 
-def fetch_users_post_images_by_user_id(pool, user_id):
+def fetch_users_post_images_by_user_id(pool, user_id, viewer_id=None):
     conn = pool.getconn()
     try:
         with conn.cursor(cursor_factory=DictCursor) as cur:
@@ -546,9 +553,20 @@ def fetch_users_post_images_by_user_id(pool, user_id):
                 JOIN Posts p ON p.user_id = u.user_id
                 LEFT JOIN Media m ON m.post_id = p.post_id
                 WHERE u.user_id = %s
+                  AND (
+                        u.public = TRUE
+                        OR %s = u.user_id
+                        OR EXISTS (
+                            SELECT 1
+                            FROM Followers f
+                            WHERE f.followee_id = u.user_id
+                              AND f.follower_id = %s
+                              AND f.is_accepted = TRUE
+                        )
+                  )
                 ORDER BY p.created_at DESC
                 """,
-                (user_id,)
+                (user_id, viewer_id, viewer_id),
             )
             rows = cur.fetchall()
         return [
@@ -590,5 +608,34 @@ def delete_post(pool, post_id):
                 (post_id,),
             )
         conn.commit()
+    finally:
+        pool.putconn(conn)
+
+def can_view_user(pool, target_user_id, viewer_id):
+    conn = pool.getconn()
+    try:
+        with conn.cursor(cursor_factory=DictCursor) as cur:
+            cur.execute(
+                """
+                SELECT 
+                    (u.public = TRUE)
+                    OR (%s = u.user_id)
+                    OR EXISTS (
+                        SELECT 1
+                        FROM Followers f
+                        WHERE f.followee_id = u.user_id
+                          AND f.follower_id = %s
+                          AND f.is_accepted = TRUE
+                    ) AS allowed
+                FROM Users u
+                WHERE u.user_id = %s
+                """,
+                (viewer_id, viewer_id, target_user_id),
+            )
+            row = cur.fetchone()
+            if row:
+                return bool(row["allowed"])
+            else:
+                return False
     finally:
         pool.putconn(conn)
