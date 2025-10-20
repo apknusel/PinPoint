@@ -377,6 +377,18 @@ def follower_request_handler():
     db.handle_follow_request(info['pool'], info['follower_id'], info['followee_id'], action)
     return jsonify({"success": True})
 
+@app.route("/unfollow", methods=["POST"])
+@requires_auth
+def unfollow():
+    data = request.get_json()
+    followee = data.get('followee')
+    info = get_request_info(followee)
+    if not info['follower_id'] or not info['followee_id']:
+        return jsonify({"success": False, "error": "Invalid request"}), 400
+    # accept=false will delete the row
+    db.handle_follow_request(info['pool'], info['follower_id'], info['followee_id'], accept=False)
+    return jsonify({"success": True})
+
 def get_request_info(followee, follower=None):
     followee = (followee or "").strip()
     pool = current_app.config["DB_POOL"]

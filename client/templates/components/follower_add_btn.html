@@ -1,13 +1,15 @@
 {% if not is_self and is_logged_in %}
-{% set is_disabled = relation in ["pending", "following"] %}
-<button id="addFollower" class="btn btn-follow" type="button" {% if is_disabled %}disabled{% endif %}
-    onclick="requestFollowing()">
-    {% if relation == "pending" %}
-    pending
-    {% elif relation == "following" %}
-    following
-    {% else %}
-    + follow
-    {% endif %}
+{% if relation == "pending" %}
+<button id="addFollower" class="btn btn-follow" type="button" disabled>
+  pending
 </button>
+{% elif relation == "following" %}
+<button id="addFollower" class="btn btn-follow" type="button" onclick="requestUnfollow()">
+  unfollow
+</button>
+{% else %}
+<button id="addFollower" class="btn btn-follow" type="button" onclick="requestFollowing()">
+  + follow
+</button>
+{% endif %}
 {% endif %}

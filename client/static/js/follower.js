@@ -86,7 +86,32 @@ async function requestHandler(event, action) {
     } catch (e) {
         console.log(e.message);
     }
-    
+
+}
+
+async function requestUnfollow() {
+    const followee_id = pathParts[2];
+    const prevText = add_follower.innerText;
+    add_follower.disabled = true;
+
+    try {
+        const response = await fetch("/unfollow", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ followee: followee_id })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || "Server Error");
+
+        add_follower.disabled = false;
+        add_follower.innerText = "+ follow";
+        add_follower.onclick = requestFollowing;
+        add_follower.setAttribute("onclick", "requestFollowing()");
+    } catch (e) {
+        console.log(e.message);
+        add_follower.disabled = false;
+        add_follower.innerText = prevText;
+    }
 }
 
 document.addEventListener('click', (e) => {
@@ -99,12 +124,12 @@ document.addEventListener('click', (e) => {
 });
 
 function cleanupRequests() {
-  const container = document.querySelector('#requestContainer');
-  if (container && container.children.length === 0) {
-    const section_title = document.querySelector('#followRequest');
-    container.remove();
-    if (section_title){
-        section_title.remove();
+    const container = document.querySelector('#requestContainer');
+    if (container && container.children.length === 0) {
+        const section_title = document.querySelector('#followRequest');
+        container.remove();
+        if (section_title) {
+            section_title.remove();
+        }
     }
-  }
 }
