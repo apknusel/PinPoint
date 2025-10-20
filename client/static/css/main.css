@@ -122,3 +122,7 @@
 .mapboxgl-user-location-heading {
   pointer-events: none !important;
 }
+
+.mapboxgl-marker {
+  opacity: 1 !important;
+}

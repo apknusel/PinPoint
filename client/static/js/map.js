@@ -20,7 +20,7 @@ async function initMap() {
         })
     );
     map.addControl(new ResetControl(center, 2, 3000)); // 3 second animation for slower, smoother reset
-    
+
     // Hide loading overlay once map is fully loaded
     map.on('load', () => {
         const overlay = document.getElementById('map-loading-overlay');
@@ -30,7 +30,7 @@ async function initMap() {
             setTimeout(() => overlay.remove(), 500);
         }
     });
-    
+
     await loadPosts();
 }
 
@@ -156,7 +156,7 @@ async function loadPosts() {
                     usernameEl.textContent = escapeHtml(post.display_name);
                     captionEl.textContent = escapeHtml(post.caption);
                     linkEl.href = `/post/${post.post_id}`;
-                    
+
                     // If we have a stage and both images, animate slide; else simple swap
                     if (stageEl && currentImgEl && bufferImgEl && direction) {
                         const fromRight = direction === 'next';
