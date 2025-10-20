@@ -581,7 +581,7 @@ def fetch_users_post_images_by_user_id(pool, user_id, viewer_id=None):
     finally:
         pool.putconn(conn)
         
-def update_post(pool, post_id, caption, lng, lat):
+def update_post(pool, user_id, post_id, caption, lng, lat):
     conn = pool.getconn()
     try:
         with conn.cursor(cursor_factory=DictCursor) as cur:
@@ -590,24 +590,24 @@ def update_post(pool, post_id, caption, lng, lat):
                 UPDATE Posts
                 SET caption = %s,
                     location = ST_SetSRID(ST_MakePoint(%s, %s), 4326)
-                WHERE post_id = %s
+                WHERE post_id = %s AND user_id = %s
                 """,
-                (caption, lng, lat, post_id),
+                (caption, lng, lat, post_id, user_id),
             )
         conn.commit()
     finally:
         pool.putconn(conn)
 
-def delete_post(pool, post_id):
+def delete_post(pool, user_id, post_id):
     conn = pool.getconn()
     try:
         with conn.cursor() as cur:
             cur.execute(
                 """
                 DELETE FROM Posts
-                WHERE post_id = %s
+                WHERE post_id = %s AND user_id = %s
                 """,
-                (post_id,),
+                (post_id, user_id),
             )
         conn.commit()
     finally:
