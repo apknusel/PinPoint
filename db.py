@@ -48,35 +48,55 @@ def fetch_posts(pool, viewer_id=None):
     conn = pool.getconn()
     try:
         with conn.cursor(cursor_factory=DictCursor) as cur:
-            cur.execute(
-                """
-                SELECT 
-                    p.post_id,
-                    p.caption,
-                    p.user_id,
-                    u.display_name,
-                    ST_X(p.location) AS longitude,
-                    ST_Y(p.location) AS latitude,
-                    encode(ST_AsEWKB(p.location), 'hex') AS location_key,
-                    m.thumbnail_data
-                FROM Posts p
-                JOIN Users u ON p.user_id = u.user_id
-                LEFT JOIN Media m ON m.post_id = p.post_id
-                WHERE p.location IS NOT NULL
-                  AND (
-                        u.public = TRUE
-                        OR %s = p.user_id
-                        OR EXISTS (
-                            SELECT 1
-                            FROM Followers f
-                            WHERE f.followee_id = p.user_id
-                              AND f.follower_id = %s
-                              AND f.is_accepted = TRUE
-                        )
-                  )
-                """,
-                (viewer_id, viewer_id),
-            )
+            if viewer_id is None:
+                cur.execute(
+                    """
+                    SELECT 
+                        p.post_id,
+                        p.caption,
+                        p.user_id,
+                        u.display_name,
+                        ST_X(p.location) AS longitude,
+                        ST_Y(p.location) AS latitude,
+                        encode(ST_AsEWKB(p.location), 'hex') AS location_key,
+                        m.thumbnail_data
+                    FROM Posts p
+                    JOIN Users u ON p.user_id = u.user_id
+                    LEFT JOIN Media m ON m.post_id = p.post_id
+                    WHERE p.location IS NOT NULL
+                      AND u.public = TRUE
+                    """
+                )
+            else:
+                cur.execute(
+                    """
+                    SELECT 
+                        p.post_id,
+                        p.caption,
+                        p.user_id,
+                        u.display_name,
+                        ST_X(p.location) AS longitude,
+                        ST_Y(p.location) AS latitude,
+                        encode(ST_AsEWKB(p.location), 'hex') AS location_key,
+                        m.thumbnail_data
+                    FROM Posts p
+                    JOIN Users u ON p.user_id = u.user_id
+                    LEFT JOIN Media m ON m.post_id = p.post_id
+                    WHERE p.location IS NOT NULL
+                      AND (
+                            u.public = TRUE
+                            OR %s = p.user_id
+                            OR EXISTS (
+                                SELECT 1
+                                FROM Followers f
+                                WHERE f.followee_id = p.user_id
+                                  AND f.follower_id = %s
+                                  AND f.is_accepted = TRUE
+                            )
+                      )
+                    """,
+                    (viewer_id, viewer_id),
+                )
             rows = cur.fetchall()
         return [
             {
