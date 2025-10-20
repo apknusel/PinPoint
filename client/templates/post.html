@@ -20,9 +20,9 @@
 <div class="post-div">
   <div class="post-header">
     <a href="{{ url_for('profile', user_id=post.user_id) }}" class="user-link">
-      <img class="post-avatar" src="{{ post.picture }}" alt="{{ post.display_name }} profile">
+      <img class="post-avatar" src="{{ post.picture|e }}" alt="{{ post.display_name|e }} profile">
       <div class="post-user">
-        <span class="post-username">{{ post.display_name }}</span>
+        <span class="post-username">{{ post.display_name|e }}</span>
         <span class="post-subtitle">View profile</span>
       </div>
     </a>
@@ -70,7 +70,7 @@
   </figure>
 
   <div class="post-caption">
-    <textarea id="postCaptionTextarea" class="post-caption-textarea" name="caption" readonly>{{post.caption}}</textarea>
+    <textarea id="postCaptionTextarea" class="post-caption-textarea" name="caption" readonly>{{ post.caption|e }}</textarea>
   </div>
 
   <div class="section-divider"></div>
@@ -83,10 +83,10 @@
     {% if comments %}
     {% for c in comments %}
     <div class="comment">
-      <img class="comment-avatar" src="{{ c.picture or '' }}" alt="{{ c.display_name }}">
+      <img class="comment-avatar" src="{{ c.picture or '' }}" alt="{{ c.display_name|e }}">
       <div class="comment-body">
-        <strong class="comment-name">{{ c.display_name }}</strong>
-        <span class="comment-text">{{ c.comment }}</span>
+        <strong class="comment-name">{{ c.display_name|e }}</strong>
+        <span class="comment-text">{{ c.comment|e }}</span>
       </div>
     </div>
     {% endfor %}
@@ -112,11 +112,11 @@
   {% if recommended_posts %}
   <div class="recommended-list">
     {% for rp in recommended_posts %}
-    <a class="recommended-item" href="{{ url_for('post', post_id=rp.post_id) }}" title="{{ rp.caption }}">
-      <img class="recommended-thumb" src="data:image/jpeg;base64,{{ rp.image_data }}" alt="{{ rp.caption }}">
+    <a class="recommended-item" href="{{ url_for('post', post_id=rp.post_id) }}" title="{{ rp.caption|e }}">
+      <img class="recommended-thumb" src="data:image/jpeg;base64,{{ rp.image_data }}" alt="{{ rp.caption|e }}">
       <div class="recommended-info">
-        <div class="recommended-username">{{ rp.display_name }}</div>
-        <div class="recommended-caption">{{ rp.caption }}</div>
+        <div class="recommended-username">{{ rp.display_name|e }}</div>
+        <div class="recommended-caption">{{ rp.caption|e }}</div>
       </div>
     </a>
     {% endfor %}
