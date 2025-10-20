@@ -1,0 +1,45 @@
+.settings-div {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  margin: 16px;
+}
+
+.settings-header-bar {
+  border-bottom: 1px solid var(--border-color);
+  padding: 12px 16px;
+}
+
+.user-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.settings-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.settings-user {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.settings-username {
+  font-weight: 700;
+}
+
+.settings-subtitle {
+  font-size: 12px;
+  color: var(--post-subtitle);
+}
+
+.settings-content {
+  padding: 12px 16px 16px;
+}

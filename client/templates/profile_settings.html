@@ -2,38 +2,56 @@
 
 {% block title %}Profile Settings{% endblock %}
 
-{% block center %}
-	<h1>{{ display_name|e }}'s Settings</h1>    
-    <form class="pure-form pure-form-stacked" method="POST" action="{{ url_for('handle_update_profile_settings') }}">
-        <fieldset>
-            <legend>Profile Information</legend>
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile_settings.css') }}">
+{% endblock %}
 
-            <label for="display_name">Current Display Name</label>
-            <input type="text" 
-                   id="display_name" 
-                   name="display_name" 
-                   value="{{ display_name|e }}" 
-                   class="pure-input-1"
-                   maxlength="13"
-                   minlength="3"
-                   pattern="[A-Za-z]+( [A-Za-z]+)*"
-                   />
-            <span class="pure-form-message">This is how other users see you.</span>
-            
-            <label for="privacy_settings">Current Privacy Settings</label>
-            <select id="privacy_settings" name="privacy_settings" class="pure-input-1">
-                {% if public %}
-                <option value="public" selected>Public - Anyone can see your profile</option>
-                <option value="private">Private - Only you and your followers can see your profile</option>
-                {% else %}
-                <option value="public">Public - Anyone can see your profile</option>
-                <option value="private" selected>Private - Only you and your followers can see your profile</option>
-                {% endif %}
-            </select>
-            
-            <button type="submit" class="pure-button pure-button-primary" style="margin-top: 1rem;">
-                Update Profile
-            </button>
-        </fieldset>
+{% block center %}
+<div class="settings-div">
+  <div class="settings-header-bar">
+    <a href="{{ url_for('profile', user_id=user_id) }}" class="user-link">
+      <img class="settings-avatar" src="{{ picture|e }}" alt="{{ display_name|e }} avatar">
+      <div class="settings-user">
+        <span class="settings-username">{{ display_name|e }}</span>
+        <span class="settings-subtitle">View profile</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="settings-content">
+    <form class="pure-form pure-form-stacked" method="POST" action="{{ url_for('handle_update_profile_settings') }}">
+      <fieldset>
+        <legend>Profile Information</legend>
+
+        <label for="display_name">Current Display Name</label>
+        <input
+          type="text"
+          id="display_name"
+          name="display_name"
+          value="{{ display_name|e }}"
+          class="pure-input-1"
+          maxlength="13"
+          minlength="3"
+          pattern="[A-Za-z]+( [A-Za-z]+)*"
+        />
+        <span class="pure-form-message">This is how other users see you.</span>
+
+        <label for="privacy_settings">Current Privacy Settings</label>
+        <select id="privacy_settings" name="privacy_settings" class="pure-input-1">
+          {% if public %}
+          <option value="public" selected>Public - Anyone can see your profile</option>
+          <option value="private">Private - Only you and your followers can see your profile</option>
+          {% else %}
+          <option value="public">Public - Anyone can see your profile</option>
+          <option value="private" selected>Private - Only you and your followers can see your profile</option>
+          {% endif %}
+        </select>
+
+        <button type="submit" class="pure-button pure-button-primary" style="margin-top: 1rem;">
+          Update Profile
+        </button>
+      </fieldset>
     </form>
+  </div>
+</div>
 {% endblock %}

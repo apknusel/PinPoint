@@ -330,9 +330,12 @@ def profile_settings(user_id):
     userinfo = session["userinfo"]
     user_id = userinfo.get("sub")
     current_settings = db.fetch_user_settings(pool, user_id)
+    profile_picture = db.fetch_user_profile_image_by_user_id(pool, user_id)
     return render_template("profile_settings.html", 
                            display_name=current_settings["display_name"],
-                           public=current_settings["public"])
+                           public=current_settings["public"],
+                           picture=profile_picture["picture"],
+                           user_id=user_id)
 
 @app.route("/update_profile_settings", methods=["POST"])
 def handle_update_profile_settings():
