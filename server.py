@@ -8,10 +8,20 @@ from urllib.parse import quote_plus, urlencode, unquote_plus
 from dotenv import load_dotenv
 from functools import wraps
 from PIL import Image, ImageOps
+import re
 
 load_dotenv()
 
 oauth = None
+
+def normalize_display_name(name):
+    # Trim and collapse multiple spaces to one
+    normalized = " ".join(name.strip().split())
+    if not (3 <= len(normalized) <= 13):
+        return None
+    if not re.compile(r"^[A-Za-z]+(?: [A-Za-z]+)*$").fullmatch(normalized):
+        return None
+    return normalized
 
 
 def requires_auth(f):
@@ -142,12 +152,15 @@ def complete_profile():
         pool = current_app.config["DB_POOL"]
         user_id = userinfo.get("sub")
         display_name = request.form.get('display_name')
+        normalized_name = normalize_display_name(display_name)
+        if not normalized_name:
+            return "Invalid display name. Must be 3-13 letters with single spaces.", 400
         privacy_settings = (request.form.get('privacy_settings') == "public")
         
-        db.update_profile_settings(pool, user_id, display_name, privacy_settings)
+        db.update_profile_settings(pool, user_id, normalized_name, privacy_settings)
         
         session['profile_complete'] = True
-        session['display_name'] = display_name
+        session['display_name'] = normalized_name
         session['public'] = privacy_settings
         
         return redirect(url_for("index"))
@@ -328,9 +341,12 @@ def handle_update_profile_settings():
     user_id = userinfo.get("sub")
     print(user_id)
     display_name = request.form.get('display_name')
+    normalized_name = normalize_display_name(display_name)
+    if not normalized_name:
+        return "Invalid display name. Must be 3-13 letters with single spaces.", 400
     privacy_settings = (request.form.get('privacy_settings') == "public")
-    db.update_profile_settings(pool, user_id, display_name, privacy_settings)
-    session['display_name'] = display_name
+    db.update_profile_settings(pool, user_id, normalized_name, privacy_settings)
+    session['display_name'] = normalized_name
     session['public'] = privacy_settings
     return redirect(url_for("profile_root"))
 
