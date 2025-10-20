@@ -56,52 +56,12 @@ async function loadPosts(profileUserId) {
                 coordToPosts[key].push(post);
             });
 
-            // Helper to flash only the image element inside a post card
-            function flashImageByPostId(postId) {
-                const postEl = document.querySelector(`.post[data-post-id="${CSS.escape(postId)}"]`);
-                if (!postEl) return;
-                const img = postEl.querySelector('img');
-                if (!img) return;
-
-                const anchor = postEl.querySelector('a');
-                if (!anchor) return;
-
-                // Compute overlay size/position to match image's rendered box
-                const rect = img.getBoundingClientRect();
-                const parentRect = anchor.getBoundingClientRect();
-
-                // If image not yet laid out (e.g., hidden), retry after layout
-                if (rect.width === 0 || rect.height === 0) {
-                    setTimeout(() => flashImageByPostId(postId), 0);
-                    return;
-                }
-
-                const overlay = document.createElement('div');
-                overlay.className = 'img-flash-overlay';
-                overlay.style.left = `${rect.left - parentRect.left}px`;
-                overlay.style.top = `${rect.top - parentRect.top}px`;
-                overlay.style.width = `${rect.width}px`;
-                overlay.style.height = `${rect.height}px`;
-
-                anchor.appendChild(overlay);
-                // Remove after animation completes
-                setTimeout(() => overlay.remove(), 3100);
-            }
-
             // Helpers to filter grid to a set of post ids and reset back
             const postsGrid = document.querySelector('.profile-posts');
-            function resetGridFilter() {
-                if (!postsGrid) return;
-                postsGrid.classList.remove('filtering');
-                document.querySelectorAll('.pure-u-1-3.is-selected').forEach((col) => {
-                    col.classList.remove('is-selected');
-                });
-            }
 
             function filterGridToPostIds(postIds) {
                 if (!postsGrid) return;
                 const idSet = new Set(postIds);
-                postsGrid.classList.add('filtering');
                 document.querySelectorAll('.profile-posts .pure-u-1-3').forEach((col) => {
                     const postCard = col.querySelector('.post');
                     const postId = postCard && postCard.getAttribute('data-post-id');
@@ -132,10 +92,6 @@ async function loadPosts(profileUserId) {
                     // Filter grid to these posts and center first
                     const ids = group.map((p) => String(p.post_id));
                     filterGridToPostIds(ids);
-                    // After layout updates, flash images for all posts in this group
-                    requestAnimationFrame(() => {
-                        ids.forEach((id) => flashImageByPostId(id));
-                    });
                 });
 
                 bounds.extend([longitude, latitude]);
@@ -146,29 +102,6 @@ async function loadPosts(profileUserId) {
                 maxZoom: 12
             };
             map.fitBounds(bounds, fitOptions);
-
-            // Update reset control to return to the fitted bounds view
-            if (typeof ResetControl !== 'undefined') {
-                if (resetControl) {
-                    try { map.removeControl(resetControl); } catch (_) {}
-                }
-                resetControl = new ResetControl({ lat: 44.9778, lng: -93.2650 }, 12, null, bounds);
-                map.addControl(resetControl);
-            }
-
-            // Clicking on map background resets the grid
-            map.on('click', (e) => {
-                const t = e && e.originalEvent && e.originalEvent.target;
-                if (t && t.closest && t.closest('.mapboxgl-marker')) return;
-                resetGridFilter();
-            });
-
-            // Clicking page whitespace resets the grid as well
-            document.addEventListener('click', (e) => {
-                if (e.target && e.target.closest && e.target.closest('.mapboxgl-marker')) return;
-                if (e.target && e.target.closest && e.target.closest('.profile-posts')) return; // allow clicks inside grid without reset
-                resetGridFilter();
-            });
         }
     } catch (error) {
         console.error('Error loading posts:', error);
