@@ -5,15 +5,15 @@
     {% for follower in followers_data.followed_by %}
     {% if not follower['is_accepted']%}
     <li class="request-li">
-        <img class="follower-avatar" src="{{follower['follower_picture']}}" alt="{{follower['follower_name']}}" />
+        <img class="follower-avatar" src="{{ follower['follower_picture']|e }}" alt="{{ follower['follower_name']|e }}" />
         <div class="user-info-container">
-            <h3 class="follower-name">{{follower['follower_name']}}</h3>
-            <p class="follower-email">{{follower['follower_email']}}</p>
+            <h3 class="follower-name">{{ follower['follower_name']|e }}</h3>
+            <p class="follower-email">{{ follower['follower_email']|e }}</p>
         </div>
         <div class="request-actions">
-            <button type="button" value="{{ follower['follower_id'] }}" class="btn btn-accept"
+            <button type="button" value="{{ follower['follower_id']|e }}" class="btn btn-accept"
                 onclick="requestHandler(event, true)">Accept</button>
-            <button type="button" value="{{ follower['follower_id'] }}" class="btn btn-decline"
+            <button type="button" value="{{ follower['follower_id']|e }}" class="btn btn-decline"
                 onclick="requestHandler(event, false)">Decline</button>
         </div>
     </li>

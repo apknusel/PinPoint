@@ -3,7 +3,7 @@
 {% block title %}Profile Settings{% endblock %}
 
 {% block center %}
-	<h1>{{ display_name }}'s Settings</h1>    
+	<h1>{{ display_name|e }}'s Settings</h1>    
     <form class="pure-form pure-form-stacked" method="POST" action="{{ url_for('handle_update_profile_settings') }}">
         <fieldset>
             <legend>Profile Information</legend>
@@ -12,7 +12,7 @@
             <input type="text" 
                    id="display_name" 
                    name="display_name" 
-                   value="{{ display_name }}" 
+                   value="{{ display_name|e }}" 
                    class="pure-input-1"
                    maxlength="13"
                    minlength="3"
