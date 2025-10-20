@@ -396,17 +396,16 @@ def update_post(post_id):
         lng_f = float(lng)
     except ValueError:
         return "Invalid coordinates", 400
-    
+    userinfo = session["userinfo"]
+    user_id = userinfo["sub"]
     pool = current_app.config["DB_POOL"]
-    db.update_post(pool, post_id, caption, lng_f, lat_f )
+    db.update_post(pool, user_id, post_id, caption, lng_f, lat_f )
     return "success", 200
 
 @app.route("/delete_post/<post_id>")
 def delete_post(post_id):
     userinfo = session["userinfo"]
     user_id = userinfo["sub"]
-    
     pool = current_app.config["DB_POOL"]
-
-    db.delete_post(pool, post_id)
+    db.delete_post(pool, user_id, post_id)
     return redirect(url_for('profile', user_id=user_id))
