@@ -6,28 +6,56 @@
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.css" rel="stylesheet">
 {% endblock %}
 
-{% block scripts %} 
+{% block scripts %}
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script>
-    window.MAPBOX_ACCESS_TOKEN = '{{ mapbox_access_token }}';
+  window.MAPBOX_ACCESS_TOKEN = '{{ mapbox_access_token }}';
 </script>
 <script src="{{ url_for('static', filename='js/post_map.js') }}"></script>
+<script src="{{ url_for('static', filename='js/modify_post.js') }}"></script>
 {% endblock %}
 
 {% block center %}
 <div class="post-div">
   <div class="post-header">
     <a href="{{ url_for('profile', user_id=post.user_id) }}" class="user-link">
-      <img class="post-avatar" src="{{ post.picture }}" alt="{{ post.nickname }} profile">
+      <img class="post-avatar" src="{{ post.picture }}" alt="{{ post.display_name }} profile">
       <div class="post-user">
         <span class="post-username">{{ post.display_name }}</span>
         <span class="post-subtitle">View profile</span>
       </div>
     </a>
+
+    {% if is_self %}
+    <div class="modify-widget">
+      <button id="postModify" class="post-modify">
+        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#000000"
+          stroke-width="3" stroke-linecap="square" stroke-linejoin="arcs">
+          <polygon points="14 2 18 6 7 17 3 17 3 13 14 2"></polygon>
+          <line x1="3" y1="22" x2="21" y2="22"></line>
+        </svg>
+      </button>
+      <div class="popup">
+        <span class="popuptext" id="myPopup">Click again to confirm</span>
+        <button id="postDelete" class="post-delete">
+        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#000000"
+          stroke-width="3" stroke-linecap="square" stroke-linejoin="arcs">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          <line x1="10" y1="11" x2="10" y2="17"></line>
+          <line x1="14" y1="11" x2="14" y2="17"></line>
+        </svg>
+      </button>
+      </div>
+      
+    </div>
+    {% endif %}
   </div>
 
+
   <figure class="post-picture">
+    <img class="post-picture-bg" src="data:image/jpeg;base64,{{ post.image_data }}" alt="" aria-hidden="true">
     <img src="data:image/jpeg;base64,{{ post.image_data }}" alt="Post image">
     <!-- Map overlay -->
     <div class="post-map-overlay" id="mapOverlay">
@@ -42,7 +70,7 @@
   </figure>
 
   <div class="post-caption">
-    <p>{{ post.caption }}</p>
+    <textarea id="postCaptionTextarea" class="post-caption-textarea" name="caption" readonly>{{post.caption}}</textarea>
   </div>
 
   <div class="section-divider"></div>

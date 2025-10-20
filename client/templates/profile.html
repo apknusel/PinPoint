@@ -9,6 +9,8 @@
 
 {% block scripts %}
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="{{ url_for('static', filename='js/reset_map_btn.js') }}"></script>
 <script src="{{ url_for('static', filename='js/profile_map.js') }}"></script>
 <script src="{{ url_for('static', filename='js/follower.js') }}" async defer></script>
 {% endblock %}
@@ -16,8 +18,13 @@
 {% block content %}
 <div class="pure-u-1 pure-u-lg-1-5">
   <div class="profile-card">
+    {% if can_view_profile or is_self %}
     {% include "./components/follower_request_list.html" %}
     {% include "./components/follower_view_list.html" %}
+    {% else %}
+    <h3 class="section-title">Followers</h3>
+    <p>Followers are hidden</p>
+    {% endif %}
   </div>
 </div>
 
@@ -29,22 +36,26 @@
       {% include "./components/follower_add_btn.html"%}
     </div>
 
-    {% if posts %}
-    <div class="profile-posts">
-      <div class="pure-g">
-        {% for p in posts %}
-        <div class="pure-u-1-3">
-          <div class="post">
-            <a class="post-link" href="{{ url_for('post', post_id=p.post_id) }}">
-              <img src="data:image/jpeg;base64,{{ p.image_data }}" alt="Post image" class="pure-img">
-            </a>
+    {% if can_view_profile or is_self %}
+      {% if posts %}
+      <div class="profile-posts">
+        <div class="pure-g">
+          {% for p in posts %}
+          <div class="pure-u-1-3">
+            <div class="post" data-post-id="{{ p.post_id }}">
+              <a class="post-link" href="{{ url_for('post', post_id=p.post_id) }}">
+                <img src="data:image/jpeg;base64,{{ p.image_data }}" alt="Post image" class="pure-img">
+              </a>
+            </div>
           </div>
+          {% endfor %}
         </div>
-        {% endfor %}
       </div>
-    </div>
+      {% else %}
+      <div class="no-posts">No posts</div>
+      {% endif %}
     {% else %}
-    <div class="no-posts">No posts</div>
+      <div class="no-posts">This account is private</div>
     {% endif %}
   </div>
 </div>

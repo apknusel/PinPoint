@@ -1,14 +1,41 @@
 <!-- Mapbox GL JS -->
 <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
-<link href="https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.css" rel="stylesheet">
-<script src="https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.js"></script>
 <style>
-body { margin: 0; padding: 0; }
-#map { position: absolute; top: 50px; bottom: 0; width: 100%; }
+body { background-color: #0a1929 !important; }
 </style>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.css" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/map_popup.css') }}" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
 <script>
     window.MAPBOX_ACCESS_TOKEN = '{{ mapbox_access_token }}';
 </script>
 <script src="{{ url_for('static', filename='js/map.js') }}"></script>
 <script src="{{ url_for('static', filename='js/reset_map_btn.js') }}"></script>
 <div id="map"></div>
+<div id="map-loading-overlay" style="position: absolute; top: 50px; bottom: 0; width: 100%; background-color: #0a1929; z-index: 9999; pointer-events: none;"></div>
+
+<!-- Popup card template (cloned by JS) -->
+<template id="map-post-card-template">
+  <div class="post-card">
+    <div class="post-card-image-container">
+      <div class="post-card-image-stage">
+        <img src="" alt="" class="post-card-image post-card-image-current" />
+        <img src="" alt="" class="post-card-image post-card-image-buffer" />
+      </div>
+      <div class="post-card-image-overlay" role="group" aria-label="Post image navigation">
+        <button class="post-card-nav-icon-btn post-card-prev" aria-label="Previous post" type="button">
+          <i data-lucide="chevron-left"></i>
+        </button>
+        <button class="post-card-nav-icon-btn post-card-next" aria-label="Next post" type="button">
+          <i data-lucide="chevron-right"></i>
+        </button>
+      </div>
+    </div>
+    <div class="post-card-body">
+      <h3 class="post-card-username"></h3>
+      <p class="post-card-caption"></p>
+      <a href="#" class="post-card-link">View Post →</a>
+    </div>
+  </div>
+  </template>
