@@ -102,6 +102,16 @@ async function loadPosts(profileUserId) {
                 maxZoom: 12
             };
             map.fitBounds(bounds, fitOptions);
+
+            // Recreate reset control to return to the fitted marker bounds
+            if (typeof ResetControl !== 'undefined') {
+                if (resetControl) {
+                    try { map.removeControl(resetControl); } catch (_) {}
+                }
+                // Use the same maxZoom as fit to avoid zooming in too far
+                resetControl = new ResetControl({ lat: 44.9778, lng: -93.2650 }, 12, null, bounds);
+                map.addControl(resetControl);
+            }
         }
     } catch (error) {
         console.error('Error loading posts:', error);
