@@ -100,7 +100,7 @@
       <button type="submit" class="pure-button pure-button-primary">Comment</button>
     </form>
     {% else %}
-    <p class="comment-login"><a href="/login">Log in</a> to comment.</p>
+    <p class="comment-login"><a href="{{ url_for('login', next=request.full_path) }}">Log in</a> to comment.</p>
     {% endif %}
   </div>
 </div>

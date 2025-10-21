@@ -48,7 +48,7 @@
                 </svg>
             </a>
             {% else %}
-            <span class="nav-message">Want to make a post and comment? <a href="/login"
+            <span class="nav-message">Want to make a post and comment? <a href="{{ url_for('login', next=request.full_path) }}"
                     class="nav-login-link">login</a>!</span>
             {% endif %}
         </div>

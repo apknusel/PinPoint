@@ -7,7 +7,7 @@ from authlib.integrations.flask_client import OAuth
 from urllib.parse import quote_plus, urlencode, unquote_plus
 from dotenv import load_dotenv
 from functools import wraps
-from PIL import Image, ImageOps
+from PIL import Image
 import re
 
 load_dotenv()
@@ -28,7 +28,10 @@ def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         if not session.get("userinfo"):
-            return redirect(url_for("login"))
+            next_url = request.path
+            if request.full_path:
+                next_url = request.full_path
+            return redirect(url_for("login", next=next_url))
         return f(*args, **kwargs)
     return decorated
 
@@ -90,6 +93,9 @@ def inject_mapbox_access_token():
 
 @app.route("/login")
 def login():
+    next_url = request.args.get("next")
+    if next_url:
+        session["post_login_redirect"] = next_url
     return oauth.auth0.authorize_redirect(
         redirect_uri=url_for("callback", _external=True)
     )
@@ -132,6 +138,10 @@ def callback():
     session.update(profile_data)
 
     ensure_logged_in_user()
+
+    next_url = session.pop("post_login_redirect", None)
+    if next_url:
+        return redirect(next_url)
     return redirect(url_for("index"))
 
 @app.route("/api/check-profile-status")
