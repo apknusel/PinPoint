@@ -19,9 +19,6 @@ CSCI 5117, Fall 2024, [assignment description](https://canvas.umn.edu/courses/46
 
 ## Key Features
 
-**Describe the most challenging features you implemented
-(one sentence per bullet, maximum 4 bullets):**
-
 * Creating post previews on the main map and rendering markers in the same location.
 * Figuring out how to keep high quality images (as uploaded and preview many images on one page).
 * Figuring out how to design the database and determine relationships within the database.
@@ -29,10 +26,7 @@ CSCI 5117, Fall 2024, [assignment description](https://canvas.umn.edu/courses/46
 
 ## Testing Notes
 
-**Is there anything special we need to know in order to effectively test your app? (optional):**
-
-* Not that we can think of.
-
+* N/A
 
 ## Screenshots of Site
 
@@ -61,14 +55,6 @@ CSCI 5117, Fall 2024, [assignment description](https://canvas.umn.edu/courses/46
 
 ## External Dependencies
 
-**Document integrations with 3rd Party code or services here.
-Please do not document required libraries. or libraries that are mentioned in the product requirements**
-
-* MapBox: Used for generating all of the maps
+* MapBox (JavaScript Library): Used for generating all of the maps
 * Pillow (Python Library): For downscaling images and creating thumbnails 
-
-**If there's anything else you would like to disclose about how your project
-relied on external code, expertise, or anything else, please disclose that
-here:**
-N/A
 ...
