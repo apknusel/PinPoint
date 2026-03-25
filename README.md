@@ -32,7 +32,6 @@
 <img width="1918" height="965" alt="image" src="https://github.com/user-attachments/assets/3f577f4b-a57b-4ba4-a0d7-03c67ca10654" />
 
 ## Mock-up 
-* LucidSpark: <https://lucid.app/lucidchart/06873868-6a7f-4d27-b612-e22b552b51cc/edit?invitationId=inv_28667ffb-4614-42d2-a00b-02df28c9d774>
 
 ![CSCI5117 Project 1](https://github.com/user-attachments/assets/2815ee18-4f22-488d-ba12-b09f022303c6)
 
