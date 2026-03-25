@@ -1,16 +1,8 @@
-## App Info:
+# PinPoint
+## Info
 
-* App Name: PinPoint
-* App Link: <https://project-1-very-tired-go85.onrender.com/>
-* LucidSpark: <https://lucid.app/lucidchart/06873868-6a7f-4d27-b612-e22b552b51cc/edit?invitationId=inv_28667ffb-4614-42d2-a00b-02df28c9d774>
-
-### Contributors
-
-* Alex Knusel, knuse001@umn.edu
-* Sam Bassan, bassa050@umn.edu
-* Shuo Jiang, Jian1105@umn.edu
-* David Tomlinson, tomli104@d.umn.edu
-
+* [App Link](https://project-1-very-tired-go85.onrender.com/)
+* [LucidSpark](https://lucid.app/lucidchart/06873868-6a7f-4d27-b612-e22b552b51cc/edit?invitationId=inv_28667ffb-4614-42d2-a00b-02df28c9d774)
 
 ## Key Features
 
